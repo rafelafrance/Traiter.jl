@@ -2,5 +2,5 @@ using Traits
 using Test
 
 @testset "Traits.jl" begin
-    # Write your own tests here.
+        f(2, 1)
 end

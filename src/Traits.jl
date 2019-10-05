@@ -2,4 +2,6 @@ module Traits
 
 greet() = print("Hello World!")
 
-end # module
+include("extra_file.jl")
+
+end
