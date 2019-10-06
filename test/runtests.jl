@@ -1,7 +1,5 @@
-using Traits
-using Test
+using SafeTestsets
 
-@testset "Traits.jl" begin
-    @test my_f(2, 1) == 7
-    @test my_f(2, 3) == 13
-end
+@safetestset "Function test2" begin include("my_function_tests.jl") end
+
+@safetestset "Derivative test" begin include("my_derivative_tests.jl") end
