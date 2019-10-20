@@ -1,9 +1,14 @@
 module Traits
 
-using ForwardDiff
+import Base.parse, Base.==
 
-include("extra_file.jl")
+include("Rule.jl")
+include("Token.jl")
+include("Parser.jl")
 
-export my_f, derivative_of_my_f
+abstract type Trait end
+
+export Trait, Rule, first_match, fragment, keyword, replacer, producer,
+       Token, Parser, parse
 
 end
