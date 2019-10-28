@@ -1,16 +1,25 @@
 struct Token
-    name:: Symbol
-    match:: RegexMatch
-    Token(name::Symbol, match::RegexMatch) = new(name, match)
-    Token(name::String, match::RegexMatch) = new(Symbol(name), match)
+    rule::Rule
+    groups::Dict{String,Any}
+    span::NamedTuple{(:first, :last), Tuple{Int,Int}}
+end
+
+function Token(rule::Rule, matched::RegexMatch)
+    first = matched.offset
+    last = matched.offset + length(matched.match) - 1
+
+    if length(matched.captures) == 0
+        groups = Dict()
+    else
+        groups = [k => matched[k] for k in Base.PCRE.capture_names(matched.regex) if matched[k] != nothing]
+    end
+    Token(rule, groups, (first=first, last=last))
 end
 
 
+const Tokens = Array{Token}
+
+
 function ==(a::Token, b::Token)
-    (a.name == b.name
-        && a.match.match == b.match.match
-        && a.match.captures == b.match.captures
-        && a.match.offset == b.match.offset
-        && a.match.offsets == b.match.offsets
-        && a.match.regex == b.match.regex)
+    a.rule == b.rule && a.groups == b.groups && a.span == b.span
 end

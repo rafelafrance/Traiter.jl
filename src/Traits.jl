@@ -8,7 +8,8 @@ include("Parser.jl")
 
 abstract type Trait end
 
-export Trait, Rule, first_match, fragment, keyword, replacer, producer,
-       Token, Parser, parse
+export Trait,
+       Rule, Rules, first_match, fragment, keyword, replacer, producer,
+       Token, Tokens, Parser, parse
 
 end
