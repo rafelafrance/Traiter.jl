@@ -1,6 +1,6 @@
 module Traits
 
-import Base.parse, Base.==
+import Base.parse, Base.==, Base.replace
 
 include("Rule.jl")
 include("Token.jl")

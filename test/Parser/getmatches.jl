@@ -8,7 +8,7 @@ using Traits
 
     # It works at all
     actual = Traits.getmatches(rules, "aa")
-    expect = [Token(rule_a, Dict(), (first=1, last=2))]
+    expect = [Token(rule_a, Dict(), 1, 2)]
     @test actual == expect
 
     # # It handles no matches
@@ -17,32 +17,32 @@ using Traits
 
     # # It gets multiple matches
     actual = Traits.getmatches(rules, "aa bb")
-    expect = [Token(rule_a, Dict(), (first=1, last=2)),
-              Token(rule_b, Dict(), (first=4, last=5))]
+    expect = [Token(rule_a, Dict(), 1, 2),
+              Token(rule_b, Dict(), 4, 5)]
     @test actual == expect
 
     # It sorts matches by starting offset
     actual = Traits.getmatches(rules, "bb aa")
-    expect = [Token(rule_b, Dict(), (first=1, last=2)),
-              Token(rule_a, Dict(), (first=4, last=5))]
+    expect = [Token(rule_b, Dict(), 1, 2),
+              Token(rule_a, Dict(), 4, 5)]
     @test actual == expect
 
     # It skips noise charaters
     actual = Traits.getmatches(rules, "bb cc aa")
-    expect = [Token(rule_b, Dict(), (first=1, last=2)),
-              Token(rule_a, Dict(), (first=7, last=8))]
+    expect = [Token(rule_b, Dict(), 1, 2),
+              Token(rule_a, Dict(), 7, 8)]
     @test actual == expect
 
     # It does not return overlapping matches
     actual = Traits.getmatches(rules, "bbbaa")
-    expect = [Token(rule_b, Dict(), (first=1, last=2)),
-              Token(rule_a, Dict(), (first=4, last=5))]
+    expect = [Token(rule_b, Dict(), 1, 2),
+              Token(rule_a, Dict(), 4, 5)]
     @test actual == expect
 
     # It handles another overlapping match test
     actual = Traits.getmatches(rules, "aaaaa")
-    expect = [Token(rule_a, Dict(), (first=1, last=2)),
-              Token(rule_a, Dict(), (first=3, last=4))]
+    expect = [Token(rule_a, Dict(), 1, 2),
+              Token(rule_a, Dict(), 3, 4)]
     @test actual == expect
 
 end

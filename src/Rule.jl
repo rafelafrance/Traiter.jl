@@ -1,17 +1,20 @@
+const SEP = ";"
+const SEP_RE = Regex(SEP)
+
+
 struct Rule
-    name::Symbol
+    name::String
     regex::Regex
     action::Union{Function,Nothing}
 end
 
 
-Rule(name::String, regex, action) = Rule(Symbol(name), regex, action)
-Rule(name::String, regex) = Rule(Symbol(name), regex, nothing)
-Rule(name::Symbol, regex) = Rule(name, regex, nothing)
+Rule(name::String, regex) = Rule(name, regex, nothing)
 
 
 const Rules = Array{Rule}
 const Patterns = Union{String,Array{String}}
+const Groups = Dict{String,Any}
 
 
 function ==(a::Rule, b::Rule)
@@ -21,22 +24,19 @@ function ==(a::Rule, b::Rule)
 end
 
 
-function first_match(rule::Rule, text::String)::Dict{Symbol,String}
+function first_match(rule::Rule, text::String)::Groups
     m = match(rule.regex, text)
-    Dict(Symbol(x) => m[x] for x in values(Base.PCRE.capture_names(m.regex.regex)) if !isnothing(m[x]))
+    Dict(x => m[x] for x in values(Base.PCRE.capture_names(m.regex.regex)) if !isnothing(m[x]))
 end
 
 
+"""
+Find tokens in the regex. Look for words that are not part of a group name or a
+metacharacter. So, "word" not "<word>" and not a back-slashed character.
+"""
 function tokenize(re::String)::String
-    # Find tokens in the regex. Look for words that are not part of a group
-    # name or a metacharacter. So, "word" not "<word>". Neither "?P" nor "\b".
-    word = r"""
-        (?<! [?\\] ) (?<! < \s ) (?<! < )
-        \b (?<word> [a-z]\w* ) \b
-        (?! \s* > )
-        """xi
-
-    replace(re, word => s"\g<word>;")
+    word = r"(?<! [\\<] ) \b (?<word> [a-z]\w* ) \b (?! [>] )"xi
+    Base.replace(re, word => SubstitutionString(raw"\g<word>" * SEP))
 end
 
 
@@ -47,14 +47,14 @@ build(strs::Array{String})::String = build(join(strs, " | "))
 function fragment(name::String, re::Patterns)::Rule
     re = build(re)
     re = Regex("(?<$name> $re )", "xi")
-    Rule(Symbol(name), re)
+    Rule(name, re)
 end
 
 
 function keyword(name::String, re::Patterns)::Rule
     re = build(re)
     re = Regex(raw"\b" * "(?<$name> $re )" * raw"\b", "xi")
-    Rule(Symbol(name), re)
+    Rule(name, re)
 end
 
 
@@ -62,19 +62,17 @@ function replacer(name::String, re::Patterns)::Rule
     re = build(re)
     re = tokenize(re)
     re = Regex(raw"\b" * "(?<$name> $re )", "xi")
-    Rule(Symbol(name), re)
+    Rule(name, re)
 end
 
 
-SUFFIX = 0
-
-
-function producer(func::Function, re::Patterns)::Rule
-    global SUFFIX
-    SUFFIX += 1
-    name = "producer_$SUFFIX"
+suffix = 0
+function producer(action::Function, re::Patterns)::Rule
+    global suffix
+    suffix += 1
+    name = "producer_$suffix"
     re = build(re)
     re = tokenize(re)
     re = Regex(raw"\b" * "(?<$name> $re )", "xi")
-    Rule(Symbol(name), re, func)
+    Rule(name, re, action)
 end
