@@ -5,7 +5,6 @@ struct Parser
     producers::Rules
 end
 
-
 function parse(parser::Parser, text::String)::Tokens
     tokens = scan(parser.scanners, text)
     again = length(parser.replacers) != 0
@@ -14,7 +13,6 @@ function parse(parser::Parser, text::String)::Tokens
     end
     Token[]
 end
-
 
 function scan(rules::Rules, text::String)::Tokens
     tokens = Token[]
@@ -28,10 +26,9 @@ function scan(rules::Rules, text::String)::Tokens
     tokens
 end
 
-
 function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
     tokens = Token[]
-    token_text = join([t.rule.name for t in tokens], SEP)
+    token_text = join([t.rule.name for t in tokens], TOKEN_SEPARATOR)
     matches = getmatches(rules, token_text)
     again = length(matches) > 0
 
@@ -44,11 +41,9 @@ function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
     tokens, again
 end
 
-
 function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
     Tokens[]
 end
-
 
 """
 Get all matches for a list of rules against the text. The list is sorted by
@@ -61,7 +56,6 @@ function getmatches(rules::Rules, text::String)::Tokens
     sort!(matches, by = x -> x.first, alg = MergeSort)
 end
 
-
 """
 Remove matches that overlap the current match.
 """
@@ -70,7 +64,6 @@ function remove_overlapping!(tokens::Tokens, match::Token)
         popfirst!(tokens)
     end
 end
-
 
 """
 Merge all matched tokens into one token.
@@ -82,16 +75,17 @@ function merge_tokens(
     text::String,
 )::Tuple{Token,Int,Int}
     # Get tokens in the match
-    first_idx = length(matchall(SEP_RE, text[1:match.first]))
-    last_idx = length(matchall(SEP_RE, text[1:match.last]))
+    first_idx = length(matchall(TOKEN_SEPARATOR_RE, token_text[1:match.first]))
+    last_idx = length(matchall(TOKEN_SEPARATOR_RE, token_text[1:match.last]))
 
     # Merge groups from all of the sub-tokens
     groups = merge([t.groups for t in tokens[first_idx:last_idx]])
 
     # Add groups from the current token
     for group in token.groups
-        idx1 = length(matchall(SEP_RE, text[1:match.first]))
-        idx2 = length(matchall(SEP_RE, text[1:match.last]))
+        idx1 = length(matchall(TOKEN_SEPARATOR_RE, token_text[1:match.first]))
+        idx2 = length(matchall(TOKEN_SEPARATOR_RE, token_text[1:match.last]))
+        groups[group] = text[tokens[idx1].first:tokens[idx2.last]]
     end
 
     newtoken = Token(match.rule, groups, tokens[first_idx].first, tokens[last_idx].last)

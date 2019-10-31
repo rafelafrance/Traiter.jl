@@ -2,7 +2,12 @@ using SafeTestsets
 
 
 @safetestset "Rule.jl" begin
-    include("Rule/fragment.jl")
+    include("Rule.jl")
+end
+
+
+@safetestset "Token.jl" begin
+    include("Token.jl")
 end
 
 

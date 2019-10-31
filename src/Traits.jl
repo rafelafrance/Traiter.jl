@@ -11,5 +11,4 @@ abstract type Trait end
 export Trait,
        Rule, Rules, first_match, fragment, keyword, replacer, producer,
        Token, Tokens, Parser, parse
-
 end

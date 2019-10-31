@@ -34,5 +34,4 @@ using Traits
               Token(rule_c, RegexMatch("cc", [], 3, [], r"cc"))]
     actual = Traits.scan(scanners, "bbcc")
     @test actual == expect
-
 end
