@@ -1,10 +1,5 @@
 using Traits
 
-@testset "Rule.first_match" begin
-    rule = Rule("test", r"(?<as>aa)(?<bs>bb)")
-    @test first_match(rule, "aabbcc") == Dict("as"=> "aa", "bs" => "bb")
-end
-
 @testset "Rule.tokenize" begin
     @test Traits.tokenize("aa bb") == "aa; bb;"
     @test Traits.tokenize(raw"\b aa bb") == raw"\b aa; bb;"

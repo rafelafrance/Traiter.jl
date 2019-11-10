@@ -1,24 +1,65 @@
 struct Token
     rule::Rule
-    groups::Dict
-    first::Int
-    last::Int
+    groups::GroupDict
 end
 
 const Tokens = Array{Token}
 
-function Token(rule::Rule, match::RegexMatch)
-    groups = Dict()
-    if length(match.captures) > 0
-        names = values(Base.PCRE.capture_names(match.regex.regex))
-        groups = Dict(n => match[n] for n in names if match[n] != nothing)
-    end
-    Token(rule, groups, match.offset, last(match))
+function ==(a::Token, b::Token)
+    a.rule == b.rule && a.groups == b.groups
 end
 
-last(match::RegexMatch) = match.offset + length(match.match) - 1
+firstoffset(t::Token) = minimum(g -> minimum(x -> x.first, g), values(t.groups))
+firstoffset(t::Token, n::String) = minimum(g -> g.first, t.groups[n])
 
-function ==(a::Token, b::Token)
-    a.rule == b.rule &&
-        a.groups == b.groups && a.first == b.first && a.last == b.last
+lastoffset(t::Token) = maximum(g -> maximum(x -> x.last, g), values(t.groups))
+lastoffset(t::Token, n::String) = maximum(g -> g.last, t.groups[n])
+lastoffset(i::Int, s::Union{String,SubString{String}}) = i + length(s) - 1
+lastoffset(m::RegexMatch) = lastoffset(m.offset, m.match)
+
+groupnames(match::RegexMatch) = Base.PCRE.capture_names(match.regex.regex)
+
+function addgroup!(groups::GroupDict, name::String, group::Groups)
+    if haskey(groups, name)
+        union!(groups[name], group)
+    else
+        groups[name] = group
+    end
+end
+
+function Token(rule::Rule, dict::Dict{String,Group})
+    Token(rule, GroupDict(k => Groups([v]) for (k, v) in dict))
+end
+
+function addgroup!(groups::GroupDict, name::String, group::Group)
+    if haskey(groups, name)
+        push!(groups[name], group)
+    else
+        groups[name] = Groups([group])
+    end
+end
+
+function Token(rule::Rule, match::RegexMatch)
+    groups = GroupDict()
+    for (idx, name) in groupnames(match)
+        value = match.captures[idx]
+        if !isnothing(value)
+            first = match.offsets[idx]
+            last = lastoffset(first, value)
+            addgroup!(groups, name, Group(value, first, last))
+        end
+    end
+    group = Group(match.match, match.offset, lastoffset(match))
+    addgroup!(groups, rule.name, group)
+    Token(rule, groups)
+end
+
+function Token(rule::Rule, tokens::Tokens)
+    groups = GroupDict()
+    for token in tokens
+        for (name, group) in token.groups
+            addgroup!(groups, name, group)
+        end
+    end
+    Token(rule, groups)
 end

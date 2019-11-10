@@ -10,18 +10,12 @@ end
 const Rules = Array{Rule}
 const Patterns = Union{String,Array{String}}
 
-Rule(name::String, regex) = Rule(name, regex, nothing)
+Rule(name, regex) = Rule(name, regex, nothing)
 
 function ==(a::Rule, b::Rule)
     a_regex = filter(x -> !isspace(x), a.regex.pattern)
     b_regex = filter(x -> !isspace(x), b.regex.pattern)
     a.name == b.name && a_regex == b_regex && a.action == b.action
-end
-
-function first_match(rule::Rule, text::String)::Dict
-    m = match(rule.regex, text)
-    names = values(Base.PCRE.capture_names(m.regex.regex))
-    Dict(x => m[x] for x in names if !isnothing(m[x]))
 end
 
 """
@@ -38,6 +32,7 @@ end
 
 build(str::String)::String = join(split(str), " ")
 build(strs::Array{String})::String = build(join(strs, " | "))
+groupnames(rule::Rule) = Base.PCRE.capture_names(rule.regex.regex)
 
 function fragment(name::String, re::Patterns)::Rule
     re = build(re)
