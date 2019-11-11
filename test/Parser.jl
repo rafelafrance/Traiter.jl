@@ -271,13 +271,30 @@ end
     fun(x) = 2x
     scn = keyword("yes", "yes")
     rep = replacer("repl", "yes")
-    prd = producer(fun, "repl")
-    parser = Parser("Test", [scn], [rep], [prd])
+    prod = producer(fun, "repl")
+
+    rep2_1 = replacer("repl2_1", "yes")
+    rep2_2 = replacer("repl2_2", "repl2_1")
+    prod2 = producer(fun, "repl2_2")
+
+    # It parses
+    parser = Parser("Test", [scn], [rep], [prod])
     actual = parse(parser, "..yes..no..")
-    expect = [Token(prd, Dict(
+    expect = [Token(prod, Dict(
         "yes" => Groups([Group("yes", 3, 5)]),
         "repl" => Groups([Group("yes", 3, 5)]),
-        prd.name => Groups([Group("yes", 3, 5)]),
+        prod.name => Groups([Group("yes", 3, 5)]),
+    ))]
+    @test actual == expect
+
+    # It does a double replace
+    parser = Parser("Test", [scn], [rep2_1, rep2_2], [prod2])
+    actual = parse(parser, "..yes..no..")
+    expect = [Token(prod2, Dict(
+        "yes" => Groups([Group("yes", 3, 5)]),
+        "repl2_1" => Groups([Group("yes", 3, 5)]),
+        "repl2_2" => Groups([Group("yes", 3, 5)]),
+        prod2.name => Groups([Group("yes", 3, 5)]),
     ))]
     @test actual == expect
 end
