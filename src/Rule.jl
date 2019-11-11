@@ -32,7 +32,6 @@ end
 
 build(str::String)::String = join(split(str), " ")
 build(strs::Array{String})::String = build(join(strs, " | "))
-groupnames(rule::Rule) = Base.PCRE.capture_names(rule.regex.regex)
 
 function fragment(name::String, re::Patterns)::Rule
     re = build(re)
