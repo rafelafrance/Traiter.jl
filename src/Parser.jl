@@ -31,18 +31,30 @@ function token_text(tokens::Tokens)::String
 end
 
 function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
-    tokens = Token[]
+    replaced = Token[]
     tokentext = token_text(tokens)
     matches = getmatches(rules, tokentext)
-    again = length(matches) > 0
-
-    while length(matches) > 0
-        match = popfirst!(matches)
-
-        remove_overlapping!(matches, match)
+    if length(matches) == 0
+        return tokens, false
     end
 
-    tokens, again
+    prev_idx = 1
+    while length(matches) > 0
+        match = popfirst!(matches)
+        token, first_idx, last_idx = merge_tokens(
+            match, tokens, tokentext, text)
+        if prev_idx != first_idx
+            append!(replaced, tokens[prev_idx:first_idx-1])
+        end
+        push!(replaced, token)
+        prev_idx = last_idx
+        remove_overlapping!(matches, match)
+    end
+    if prev_idx != length(tokens)
+        append!(replaced, tokens[prev_idx+1:end])
+    end
+
+    replaced, true
 end
 
 function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
@@ -51,8 +63,7 @@ end
 
 """
 Get all matches for a list of rules against the text. The list is sorted by
-starting position. The sort is stable so if multiple rules match at a position
-then the first rule in the list wins.
+starting position. The sort is stable, preserving insertion order.
 """
 function getmatches(rules::Rules, text::String)::Tokens
     pairs = [(r, collect(eachmatch(r.regex, text))) for r in rules]
@@ -94,14 +105,18 @@ function merge_tokens(
     for (name, value) in match.groups
         idx1 = firstindex(tokentext, firstoffset(match, name))
         idx2 = lastindex(tokentext, lastoffset(match, name))
+        if length(tokens[idx1].groups) == 0 || length(tokens[idx2].groups) == 0
+            continue
+        end
         first = firstoffset(tokens[idx1])
         last = lastoffset(tokens[idx2])
-        value = text[first:last]
-        addgroup!(groups, name, Group(value, first, last))
+        addgroup!(groups, name, Group(text[first:last], first, last))
     end
-    push!(tokens, Token(match.rule, groups))
+
+    newtokens = copy(tokens)
+    push!(newtokens, Token(match.rule, groups))
 
     first_idx = firstindex(tokentext, firstoffset(match))
     last_idx = lastindex(tokentext, lastoffset(match))
-    Token(match.rule, tokens), first_idx, last_idx
+    Token(match.rule, newtokens), first_idx, last_idx
 end

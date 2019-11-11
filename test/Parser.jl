@@ -150,3 +150,57 @@ end
     actual = Traits.scan(scanners, "bbcc")
     @test actual == expect
 end
+
+@testset "Parser.replace" begin
+    yes = replacer("yes", "yes")
+    yesyes = replacer("yes", "yes yes")
+    no = replacer("no", "no")
+    rep = replacer("test", "yes")
+    rep2 = replacer("test", "yes yes")
+
+    # It replaces one token
+    tokens = [Token(no, Dict()), Token(yes, Dict()), Token(no, Dict())]
+    (actual, flag) = replace([rep], tokens, "..yes..")
+    expect = [Token(no, Dict()), Token(rep, Dict()), Token(no, Dict())]
+    @test actual == expect
+    @test flag
+
+    # It replaces multiple tokens
+    tokens = [
+        Token(no, Dict()),
+        Token(yes, Dict()), Token(yes, Dict()),
+        Token(no, Dict())
+    ]
+    (actual, flag) = replace([rep2], tokens, "..yes.yes.")
+    expect = [Token(no, Dict()), Token(rep2, Dict()), Token(no, Dict())]
+    @test actual == expect
+    @test flag
+
+    # It replaces the first token
+    tokens = [Token(yes, Dict()), Token(no, Dict())]
+    (actual, flag) = replace([rep], tokens, "..yes..")
+    expect = [Token(rep, Dict()), Token(no, Dict())]
+    @test actual == expect
+    @test flag
+
+    # It replaces the last token
+    tokens = [Token(no, Dict()), Token(yes, Dict())]
+    (actual, flag) = replace([rep], tokens, "..yes..")
+    expect = [Token(no, Dict()), Token(rep, Dict())]
+    @test actual == expect
+    @test flag
+
+    # It replaces no tokens
+    tokens = [Token(no, Dict()), Token(no, Dict())]
+    (actual, flag) = replace([rep], tokens, "..yes..")
+    expect = [Token(no, Dict()), Token(no, Dict())]
+    @test actual == expect
+    @test !flag
+
+    # It replaces all tokens
+    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    (actual, flag) = replace([rep2], tokens, "..yes.yes.")
+    expect = [Token(rep2, Dict())]
+    @test actual == expect
+    @test flag
+end
