@@ -1,15 +1,15 @@
-using Traits
+using Traiter
 
 @testset "Rule.tokenize" begin
-    @test Traits.tokenize("aa bb") == "aa; bb;"
-    @test Traits.tokenize(raw"\b aa bb") == raw"\b aa; bb;"
-    @test Traits.tokenize(raw"(?<aa> bb) cc") == raw"(?<aa> bb;) cc;"
+    @test Traiter.tokenize("aa bb") == "aa; bb;"
+    @test Traiter.tokenize(raw"\b aa bb") == raw"\b aa; bb;"
+    @test Traiter.tokenize(raw"(?<aa> bb) cc") == raw"(?<aa> bb;) cc;"
 end
 
 
 @testset "Rule.build" begin
-    @test Traits.build(" aa   bb ") == "aa bb"
-    @test Traits.build(["aa ", "  bb  "]) == "aa | bb"
+    @test Traiter.build(" aa   bb ") == "aa bb"
+    @test Traiter.build(["aa ", "  bb  "]) == "aa | bb"
 end
 
 @testset "Rule.fragment" begin

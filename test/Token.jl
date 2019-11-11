@@ -1,4 +1,4 @@
-using Traits
+using Traiter
 
 @testset "Token.Token(::Rule, ::RegexMatch)" begin
     r = Rule("r", r"(?<a>aa)(?<b>bb)?(?<c>cc)")
@@ -61,21 +61,21 @@ end
 
 @testset "Token.groupnames" begin
     re = r"(?<q>(?<a>aa)(?<b>bb))(?<c>cc)"
-    actual = Traits.groupnames(match(re, "aabbcc"))
+    actual = Traiter.groupnames(match(re, "aabbcc"))
     expect = Dict(1 => "q", 2 => "a", 3 => "b", 4 => "c")
     @test actual == expect
 end
 
 @testset "Token.addgroup!(::GroupDict, ::String, ::Group)" begin
-    groups = Traits.GroupDict()
+    groups = Traiter.GroupDict()
     groups["aa"] = Groups([Group("11", 1, 11)])
     groups["bb"] = Groups([Group("22", 2, 22)])
     group = Group("22", 2, 22)
 
     # It adds a new key
     actual = copy(groups)
-    Traits.addgroup!(actual, "cc", group)
-    expect = Traits.GroupDict()
+    Traiter.addgroup!(actual, "cc", group)
+    expect = Traiter.GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     expect["cc"] = Groups([Group("22", 2, 22)])
@@ -83,31 +83,31 @@ end
 
     # It does not add duplicates
     actual = copy(groups)
-    Traits.addgroup!(actual, "bb", group)
-    expect = Traits.GroupDict()
+    Traiter.addgroup!(actual, "bb", group)
+    expect = Traiter.GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect
 
     # It appends to a set
     actual = copy(groups)
-    Traits.addgroup!(actual, "aa", group)
-    expect = Traits.GroupDict()
+    Traiter.addgroup!(actual, "aa", group)
+    expect = Traiter.GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11), Group("22", 2, 22)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect
 end
 
 @testset "Token.addgroup!(::GroupDict, ::String, ::Groups)" begin
-    groups = Traits.GroupDict()
+    groups = Traiter.GroupDict()
     groups["aa"] = Groups([Group("11", 1, 11)])
     groups["bb"] = Groups([Group("22", 2, 22)])
     group = Groups([Group("33", 1, 11)])
 
     # It unites the sets
     actual = copy(groups)
-    Traits.addgroup!(actual, "aa", group)
-    expect = Traits.GroupDict()
+    Traiter.addgroup!(actual, "aa", group)
+    expect = Traiter.GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11), Group("33", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect
