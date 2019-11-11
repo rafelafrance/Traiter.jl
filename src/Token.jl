@@ -1,7 +1,10 @@
 struct Token
     rule::Rule
     groups::GroupDict
+    match::Union{RegexMatch,Nothing}
 end
+
+Token(rule, groups) = Token(rule, groups, nothing)
 
 const Tokens = Array{Token}
 
@@ -9,11 +12,9 @@ function ==(a::Token, b::Token)
     a.rule == b.rule && a.groups == b.groups
 end
 
-firstoffset(t::Token) = minimum(g -> minimum(x -> x.first, g), values(t.groups))
-firstoffset(t::Token, n::String) = minimum(g -> g.first, t.groups[n])
+firstoffset(t::Token) = t.match.offset
 
-lastoffset(t::Token) = maximum(g -> maximum(x -> x.last, g), values(t.groups))
-lastoffset(t::Token, n::String) = maximum(g -> g.last, t.groups[n])
+lastoffset(t::Token) = t.match.offset + length(t.match.match) - 1
 lastoffset(i::Int, s::Union{String,SubString{String}}) = i + length(s) - 1
 lastoffset(m::RegexMatch) = lastoffset(m.offset, m.match)
 
@@ -27,16 +28,16 @@ function addgroup!(groups::GroupDict, name::String, group::Groups)
     end
 end
 
-function Token(rule::Rule, dict::Dict{String,Group})
-    Token(rule, GroupDict(k => Groups([v]) for (k, v) in dict))
-end
-
 function addgroup!(groups::GroupDict, name::String, group::Group)
     if haskey(groups, name)
         push!(groups[name], group)
     else
         groups[name] = Groups([group])
     end
+end
+
+function Token(rule::Rule, dict::Dict{String,Group})
+    Token(rule, GroupDict(k => Groups([v]) for (k, v) in dict))
 end
 
 function Token(rule::Rule, match::RegexMatch)
@@ -51,7 +52,7 @@ function Token(rule::Rule, match::RegexMatch)
     end
     group = Group(match.match, match.offset, lastoffset(match))
     addgroup!(groups, rule.name, group)
-    Token(rule, groups)
+    Token(rule, groups, match)
 end
 
 function Token(rule::Rule, tokens::Tokens)

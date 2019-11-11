@@ -34,60 +34,53 @@ function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
     replaced = Token[]
     tokentext = token_text(tokens)
     matches = getmatches(rules, tokentext)
-    if length(matches) == 0
-        return tokens, false
-    end
+    again = length(matches) > 0
 
-    prev_idx = 1
+    prev_first, prev_last = 1, 0
     while length(matches) > 0
         match = popfirst!(matches)
         token, first_idx, last_idx = merge_tokens(
             match, tokens, tokentext, text)
-        if prev_idx != first_idx
-            append!(replaced, tokens[prev_idx:first_idx-1])
+        if prev_last + 1 != first_idx
+            append!(replaced, tokens[prev_first:first_idx-1])
         end
         push!(replaced, token)
-        prev_idx = last_idx
+        prev_first, prev_last = first_idx, last_idx
         remove_overlapping!(matches, match)
     end
-    if prev_idx != length(tokens)
-        append!(replaced, tokens[prev_idx+1:end])
+    if prev_last != length(tokens)
+        append!(replaced, tokens[prev_last+1:end])
     end
 
-    replaced, true
+    replaced, again
 end
 
 function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
-    Tokens[]
+    produced = Token[]
+    tokentext = token_text(tokens)
+    matches = getmatches(rules, tokentext)
+
+    while length(matches) > 0
+        match = popfirst!(matches)
+        token, idx1, idx2 = merge_tokens(match, tokens, tokentext, text)
+        push!(produced, token)
+        remove_overlapping!(matches, match)
+    end
+
+    produced
 end
 
-"""
-Get all matches for a list of rules against the text. The list is sorted by
-starting position. The sort is stable, preserving insertion order.
-"""
 function getmatches(rules::Rules, text::String)::Tokens
     pairs = [(r, collect(eachmatch(r.regex, text))) for r in rules]
     matches = [Token(p[1], m) for p in pairs for m in p[2]]
     sort!(matches, by = x -> firstoffset(x), alg = MergeSort)
 end
 
-"""
-Remove matches that overlap the current match.
-"""
-function remove_overlapping!(tokens::Tokens, match::Token)
-    while length(tokens) > 0 && firstoffset(tokens[1]) <= lastoffset(match)
+function remove_overlapping!(tokens::Tokens, token::Token)
+    while length(tokens) > 0 && firstoffset(tokens[1]) <= lastoffset(token)
         popfirst!(tokens)
     end
 end
-
-"""
-Merge all matched tokens into one token.
-
-When a pattern of tokens (in replace or produce) is matched we need to gather
-the data from all of the matched tokens and put it into a single token. For
-instance if we want to replace the first_name and last_name tokens with a
-full_name token.
-"""
 
 function tokenindex(tokentext::String, idx::Int)
     length(collect(eachmatch(TOKEN_SEPARATOR_RE, tokentext[1:idx])))
@@ -96,27 +89,29 @@ firstindex(tokentext::String, idx::Int) = tokenindex(tokentext, idx) + 1
 lastindex(tokentext::String, idx::Int) = tokenindex(tokentext, idx)
 
 function merge_tokens(
-    match::Token,
+    token::Token,
     tokens::Tokens,
     tokentext::String,
     text::String,
 )::Tuple{Token,Int,Int}
     groups = GroupDict()
-    for (name, value) in match.groups
-        idx1 = firstindex(tokentext, firstoffset(match, name))
-        idx2 = lastindex(tokentext, lastoffset(match, name))
-        if length(tokens[idx1].groups) == 0 || length(tokens[idx2].groups) == 0
+    names = groupnames(token.match)
+    for (i, value) in enumerate(token.match.captures)
+        offset = token.match.offsets[i]
+        tkn1 = tokens[firstindex(tokentext, offset)]
+        tkn2 = tokens[lastindex(tokentext, lastoffset(offset, value))]
+        if length(tkn1.groups) == 0 || length(tkn2.groups) == 0
             continue
         end
-        first = firstoffset(tokens[idx1])
-        last = lastoffset(tokens[idx2])
-        addgroup!(groups, name, Group(text[first:last], first, last))
+        first = firstoffset(tkn1)
+        last = lastoffset(tkn2)
+        addgroup!(groups, names[i], Group(text[first:last], first, last))
     end
 
     newtokens = copy(tokens)
-    push!(newtokens, Token(match.rule, groups))
+    push!(newtokens, Token(token.rule, groups, token.match))
 
-    first_idx = firstindex(tokentext, firstoffset(match))
-    last_idx = lastindex(tokentext, lastoffset(match))
-    Token(match.rule, newtokens), first_idx, last_idx
+    first_idx = firstindex(tokentext, firstoffset(token))
+    last_idx = lastindex(tokentext, lastoffset(token))
+    Token(token.rule, newtokens), first_idx, last_idx
 end

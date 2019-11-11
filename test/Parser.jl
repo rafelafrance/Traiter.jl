@@ -153,7 +153,7 @@ end
 
 @testset "Parser.replace" begin
     yes = replacer("yes", "yes")
-    yesyes = replacer("yes", "yes yes")
+    yesyes = replacer("yesyes", "yes yes")
     no = replacer("no", "no")
     rep = replacer("test", "yes")
     rep2 = replacer("test", "yes yes")
@@ -203,4 +203,66 @@ end
     expect = [Token(rep2, Dict())]
     @test actual == expect
     @test flag
+
+    # It replaces multiple times
+    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    (actual, flag) = replace([rep], tokens, "..yes.yes.")
+    expect = [Token(rep, Dict()), Token(rep, Dict())]
+    @test actual == expect
+    @test flag
+end
+
+@testset "Parser.produce" begin
+    dummy(x) = 2x
+    yes = replacer("yes", "yes")
+    yesyes = replacer("yesyes", "yes yes")
+    no = replacer("no", "no")
+    prod = producer(dummy, "yes")
+    prod2 = producer(dummy, "yes yes")
+
+    # It produces from one token
+    tokens = [Token(no, Dict()), Token(yes, Dict()), Token(no, Dict())]
+    actual = Traits.produce([prod], tokens, "..yes..")
+    expect = [Token(prod, Dict())]
+    @test actual == expect
+
+    # It produces from multiple tokens
+    tokens = [
+        Token(no, Dict()),
+        Token(yes, Dict()), Token(yes, Dict()),
+        Token(no, Dict())
+    ]
+    actual = Traits.produce([prod2], tokens, "..yes.yes.")
+    expect = [Token(prod2, Dict())]
+    @test actual == expect
+
+    # It produces from the first token
+    tokens = [Token(yes, Dict()), Token(no, Dict())]
+    actual = Traits.produce([prod], tokens, "..yes..")
+    expect = [Token(prod, Dict())]
+    @test actual == expect
+
+    # It produces from the last token
+    tokens = [Token(no, Dict()), Token(yes, Dict())]
+    actual = Traits.produce([prod], tokens, "..yes..")
+    expect = [Token(prod, Dict())]
+    @test actual == expect
+
+    # No products
+    tokens = [Token(no, Dict()), Token(no, Dict())]
+    actual = Traits.produce([prod], tokens, "..yes..")
+    expect = []
+    @test actual == expect
+
+    # It produces from all tokens
+    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    actual = Traits.produce([prod2], tokens, "..yes.yes.")
+    expect = [Token(prod2, Dict())]
+    @test actual == expect
+
+    # It produces multiple times
+    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    actual = Traits.produce([prod], tokens, "..yes.yes.")
+    expect = [Token(prod, Dict()), Token(prod, Dict())]
+    @test actual == expect
 end

@@ -40,9 +40,9 @@ end
     tkn = Token(ra, match(ra.regex, "..aa.."))
     @test firstoffset(tkn) == 3
 
-    tkn = Token(ra, Dict("aa" => Group("11", 1, 2), "bb" => Group("33", 3, 4)))
-    @test firstoffset(tkn, "aa") == 1
-    @test firstoffset(tkn, "bb") == 3
+    # tkn = Token(ra, Dict("aa" => Group("11", 1, 2), "bb" => Group("33", 3, 4)))
+    # @test firstoffset(tkn, "aa") == 1
+    # @test firstoffset(tkn, "bb") == 3
 end
 
 @testset "Token.lastoffset" begin
@@ -54,9 +54,9 @@ end
 
     @test lastoffset(tkn) == 4
 
-    tkn = Token(ra, Dict("aa" => Group("11", 1, 2), "bb" => Group("33", 3, 4)))
-    @test lastoffset(tkn, "aa") == 2
-    @test lastoffset(tkn, "bb") == 4
+    # tkn = Token(ra, Dict("aa" => Group("11", 1, 2), "bb" => Group("33", 3, 4)))
+    # @test lastoffset(tkn, "aa") == 2
+    # @test lastoffset(tkn, "bb") == 4
 end
 
 @testset "Token.groupnames" begin
