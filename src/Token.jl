@@ -12,9 +12,11 @@ function ==(a::Token, b::Token)
     a.rule == b.rule && a.groups == b.groups
 end
 
-firstoffset(t::Token) = t.match.offset
+# firstoffset(t::Token) = t.match.offset
+firstoffset(t::Token) = minimum(g -> minimum(x -> x.first, g), values(t.groups))
 
-lastoffset(t::Token) = t.match.offset + length(t.match.match) - 1
+# lastoffset(t::Token) = t.match.offset + length(t.match.match) - 1
+lastoffset(t::Token) = maximum(g -> maximum(x -> x.last, g), values(t.groups))
 lastoffset(i::Int, s::Union{String,SubString{String}}) = i + length(s) - 1
 lastoffset(m::RegexMatch) = lastoffset(m.offset, m.match)
 

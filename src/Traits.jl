@@ -13,6 +13,6 @@ abstract type Trait end
 export Trait,
        Rule, Rules, fragment, keyword, replacer, producer,
        Group, Groups,
-       Token, Tokens, firstoffset, lastoffset
+       Token, Tokens, firstoffset, lastoffset,
        Parser, parse
 end

@@ -7,11 +7,11 @@ end
 
 function parse(parser::Parser, text::String)::Tokens
     tokens = scan(parser.scanners, text)
-    again = length(parser.replacers) != 0
+    again = length(parser.replacers) > 0
     while again
-        tokens, again = replace()
+        tokens, again = replace(parser.replacers, tokens, text)
     end
-    Token[]
+    produce(parser.producers, tokens, text)
 end
 
 function scan(rules::Rules, text::String)::Tokens

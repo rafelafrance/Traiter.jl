@@ -266,3 +266,18 @@ end
     expect = [Token(prod, Dict()), Token(prod, Dict())]
     @test actual == expect
 end
+
+@testset "Parser.parse" begin
+    fun(x) = 2x
+    scn = keyword("yes", "yes")
+    rep = replacer("repl", "yes")
+    prd = producer(fun, "repl")
+    parser = Parser("Test", [scn], [rep], [prd])
+    actual = parse(parser, "..yes..no..")
+    expect = [Token(prd, Dict(
+        "yes" => Groups([Group("yes", 3, 5)]),
+        "repl" => Groups([Group("yes", 3, 5)]),
+        prd.name => Groups([Group("yes", 3, 5)]),
+    ))]
+    @test actual == expect
+end
