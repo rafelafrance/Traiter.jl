@@ -1,7 +1,7 @@
 struct Group
     value::String
-    first::Int
-    last::Int
+    first::Integer
+    last::Integer
 end
 
 const Groups = OrderedSet{Group}

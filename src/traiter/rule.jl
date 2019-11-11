@@ -18,10 +18,6 @@ function ==(a::Rule, b::Rule)
     a.name == b.name && a_regex == b_regex && a.action == b.action
 end
 
-"""
-Find tokens in the regex. Look for words that are not part of a group name or a
-metacharacter. So, "word" not "(?<word>" and not a back-slashed character.
-"""
 function tokenize(re::String)::String
     word = r"(?<! [\\] ) (?<! \(\?< ) \b (?<word> [a-z]\w* ) \b "xi
     Base.replace(

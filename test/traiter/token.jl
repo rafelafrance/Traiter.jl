@@ -1,6 +1,6 @@
-using Traiter
+@testset "token" begin
 
-@testset "Token.Token(::Rule, ::RegexMatch)" begin
+@testset "token.Token(::Rule, ::RegexMatch)" begin
     r = Rule("r", r"(?<a>aa)(?<b>bb)?(?<c>cc)")
 
     # It gets all captures from the regex
@@ -21,7 +21,7 @@ using Traiter
     @test actual == expect
 end
 
-@testset "Token.==" begin
+@testset "token.==" begin
     ra = Rule("rulea", r"aa")
     rb = Rule("ruleb", r"bb")
     ma = match(ra.regex, "aa")
@@ -35,13 +35,13 @@ end
     @test Token(ra, ma) != Token(rb, ma)
 end
 
-@testset "Token.firstoffset" begin
+@testset "token.firstoffset" begin
     ra = Rule("rulea", r"aa")
     tkn = Token(ra, match(ra.regex, "..aa.."))
     @test Traiter.firstoffset(tkn) == 3
 end
 
-@testset "Token.lastoffset" begin
+@testset "token.lastoffset" begin
     ra = Rule("rulea", r"aa")
     tkn = Token(ra, match(ra.regex, "..aa.."))
 
@@ -51,14 +51,14 @@ end
     @test Traiter.lastoffset(tkn) == 4
 end
 
-@testset "Token.groupnames" begin
+@testset "token.groupnames" begin
     re = r"(?<q>(?<a>aa)(?<b>bb))(?<c>cc)"
     actual = Traiter.groupnames(match(re, "aabbcc"))
     expect = Dict(1 => "q", 2 => "a", 3 => "b", 4 => "c")
     @test actual == expect
 end
 
-@testset "Token.addgroup!(::GroupDict, ::String, ::Group)" begin
+@testset "token.addgroup!(::GroupDict, ::String, ::Group)" begin
     groups = Traiter.GroupDict()
     groups["aa"] = Groups([Group("11", 1, 11)])
     groups["bb"] = Groups([Group("22", 2, 22)])
@@ -90,7 +90,7 @@ end
     @test actual == expect
 end
 
-@testset "Token.addgroup!(::GroupDict, ::String, ::Groups)" begin
+@testset "token.addgroup!(::GroupDict, ::String, ::Groups)" begin
     groups = Traiter.GroupDict()
     groups["aa"] = Groups([Group("11", 1, 11)])
     groups["bb"] = Groups([Group("22", 2, 22)])
@@ -103,4 +103,6 @@ end
     expect["aa"] = Groups([Group("11", 1, 11), Group("33", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect
+end
+
 end

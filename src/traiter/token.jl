@@ -15,24 +15,24 @@ end
 firstoffset(t::Token) = minimum(g -> minimum(x -> x.first, g), values(t.groups))
 
 lastoffset(t::Token) = maximum(g -> maximum(x -> x.last, g), values(t.groups))
-lastoffset(i::Int, s::Union{String,SubString{String}}) = i + length(s) - 1
+lastoffset(i::Integer, s::Union{String,SubString{String}}) = i + length(s) - 1
 lastoffset(m::RegexMatch) = lastoffset(m.offset, m.match)
 
 groupnames(match::RegexMatch) = Base.PCRE.capture_names(match.regex.regex)
 
-function addgroup!(groups::GroupDict, name::String, group::Groups)
-    if haskey(groups, name)
-        union!(groups[name], group)
+function addgroup!(groups::GroupDict, key::String, values::Groups)
+    if haskey(groups, key)
+        union!(groups[key], values)
     else
-        groups[name] = group
+        groups[key] = values
     end
 end
 
-function addgroup!(groups::GroupDict, name::String, group::Group)
-    if haskey(groups, name)
-        push!(groups[name], group)
+function addgroup!(groups::GroupDict, key::String, value::Group)
+    if haskey(groups, key)
+        push!(groups[key], value)
     else
-        groups[name] = Groups([group])
+        groups[key] = Groups([value])
     end
 end
 

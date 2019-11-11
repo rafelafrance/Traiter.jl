@@ -26,10 +26,6 @@ function scan(rules::Rules, text::String)::Tokens
     tokens
 end
 
-function token_text(tokens::Tokens)::String
-    join([t.rule.name for t in tokens], TOKEN_SEPARATOR) * TOKEN_SEPARATOR
-end
-
 function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
     replaced = Token[]
     tokentext = token_text(tokens)
@@ -70,6 +66,10 @@ function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
     produced
 end
 
+function token_text(tokens::Tokens)::String
+    join([t.rule.name for t in tokens], TOKEN_SEPARATOR) * TOKEN_SEPARATOR
+end
+
 function getmatches(rules::Rules, text::String)::Tokens
     pairs = [(r, collect(eachmatch(r.regex, text))) for r in rules]
     matches = [Token(p[1], m) for p in pairs for m in p[2]]
@@ -82,18 +82,15 @@ function remove_overlapping!(tokens::Tokens, token::Token)
     end
 end
 
-function tokenindex(tokentext::String, idx::Int)
+function tokenindex(tokentext::String, idx::Integer)
     length(collect(eachmatch(TOKEN_SEPARATOR_RE, tokentext[1:idx])))
 end
-firstindex(tokentext::String, idx::Int) = tokenindex(tokentext, idx) + 1
-lastindex(tokentext::String, idx::Int) = tokenindex(tokentext, idx)
+firstindex(tokentext::String, idx::Integer) = tokenindex(tokentext, idx) + 1
+lastindex(tokentext::String, idx::Integer) = tokenindex(tokentext, idx)
 
 function merge_tokens(
-    token::Token,
-    tokens::Tokens,
-    tokentext::String,
-    text::String,
-)::Tuple{Token,Int,Int}
+    token::Token, tokens::Tokens, tokentext::String, text::String
+)::Tuple{Token,Integer,Integer}
     groups = GroupDict()
     names = groupnames(token.match)
     for (i, value) in enumerate(token.match.captures)

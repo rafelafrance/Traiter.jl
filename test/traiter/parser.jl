@@ -1,6 +1,6 @@
-using Traiter
+@testset "parser" begin
 
-@testset "Parser.getmaches" begin
+@testset "parser.getmaches" begin
     # Rules to use for the tests
     rule_a = Rule("rulea", r"aa")
     rule_b = Rule("ruleb", r"bb")
@@ -52,7 +52,7 @@ using Traiter
     @test Traiter.firstoffset(actual[2]) == 3
 end
 
-@testset "Parser.remove_overlapping!" begin
+@testset "parser.remove_overlapping!" begin
     text = "aaaaaaaa"
     rule = Rule("rule", r"a")
     tokens = [Token(rule, m) for m in eachmatch(rule.regex, text)]
@@ -73,7 +73,7 @@ end
     @test actual == []
 end
 
-@testset "Parser.firstindex" begin
+@testset "parser.firstindex" begin
     @test Traiter.firstindex("11;22;33;", 1) == 1
     @test Traiter.firstindex("11;22;33;", 2) == 1
     @test Traiter.firstindex("11;22;33;", 3) == 2
@@ -85,7 +85,7 @@ end
     @test Traiter.firstindex("11;22;33;", 9) == 4
 end
 
-@testset "Parser.lastindex" begin
+@testset "parser.lastindex" begin
     @test Traiter.lastindex("11;22;33;", 1) == 0
     @test Traiter.lastindex("11;22;33;", 2) == 0
     @test Traiter.lastindex("11;22;33;", 3) == 1
@@ -97,7 +97,7 @@ end
     @test Traiter.lastindex("11;22;33;", 9) == 3
 end
 
-@testset "Parser.merge_tokens" begin
+@testset "parser.merge_tokens" begin
     text = "..john smythe.."
     part = keyword("part", raw"\w+")
     full = replacer("full", "(?<first> part) (?<last> part)" )
@@ -115,7 +115,7 @@ end
     @test actual == (expect, 1, 2)
 end
 
-@testset "Parser.scan" begin
+@testset "parser.scan" begin
     rule_a = Rule("rulea", r"aa")
     rule_b = Rule("ruleb", r"bb")
     rule_c = Rule("rulec", r"cc")
@@ -151,7 +151,7 @@ end
     @test actual == expect
 end
 
-@testset "Parser.replace" begin
+@testset "parser.replace" begin
     yes = replacer("yes", "yes")
     yesyes = replacer("yesyes", "yes yes")
     no = replacer("no", "no")
@@ -212,7 +212,7 @@ end
     @test flag
 end
 
-@testset "Parser.produce" begin
+@testset "parser.produce" begin
     dummy(x) = 2x
     yes = replacer("yes", "yes")
     yesyes = replacer("yesyes", "yes yes")
@@ -267,7 +267,7 @@ end
     @test actual == expect
 end
 
-@testset "Parser.parse" begin
+@testset "parser.parse" begin
     fun(x) = 2x
     scn = keyword("yes", "yes")
     rep = replacer("repl", "yes")
@@ -297,4 +297,6 @@ end
         prod2.name => Groups([Group("yes", 3, 5)]),
     ))]
     @test actual == expect
+end
+
 end

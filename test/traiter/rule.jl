@@ -1,18 +1,18 @@
-using Traiter
+@testset "rule" begin
 
-@testset "Rule.tokenize" begin
+@testset "rule.tokenize" begin
     @test Traiter.tokenize("aa bb") == "aa; bb;"
     @test Traiter.tokenize(raw"\b aa bb") == raw"\b aa; bb;"
     @test Traiter.tokenize(raw"(?<aa> bb) cc") == raw"(?<aa> bb;) cc;"
 end
 
 
-@testset "Rule.build" begin
+@testset "rule.build" begin
     @test Traiter.build(" aa   bb ") == "aa bb"
     @test Traiter.build(["aa ", "  bb  "]) == "aa | bb"
 end
 
-@testset "Rule.fragment" begin
+@testset "rule.fragment" begin
     @test fragment("test", "aa") == Rule("test", r"(?<test> aa )"xi)
     @test fragment("test", ["aa", "bb"]) == Rule(
         "test",
@@ -20,7 +20,7 @@ end
     )
 end
 
-@testset "Rule.keyword" begin
+@testset "rule.keyword" begin
     @test keyword("test", "aa") == Rule("test", r"\b(?<test> aa )\b"xi)
     @test keyword("test", ["aa", "bb"]) == Rule(
         "test",
@@ -28,7 +28,7 @@ end
     )
 end
 
-@testset "Rule.replacer" begin
+@testset "rule.replacer" begin
     @test replacer("test", "aa") == Rule("test", r"\b (?<test> aa; )"xi)
     @test replacer("test", ["aa", "bb"]) == Rule(
         "test",
@@ -36,7 +36,7 @@ end
     )
 end
 
-@testset "Rule.producer" begin
+@testset "rule.producer" begin
     dummy(x) = x + 1
     @test producer(dummy, "aa") == Rule(
         "producer_1",
@@ -48,4 +48,6 @@ end
         r"\b (?<producer_2> aa; | bb; )"xi,
         dummy,
     )
+end
+
 end
