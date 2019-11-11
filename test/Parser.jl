@@ -48,8 +48,8 @@ using Traiter
     actual = Traiter.getmatches(rules, text)
     matches = collect(eachmatch(rule_a.regex, text))
     @test actual == [Token(rule_a, matches[1]), Token(rule_a, matches[2])]
-    @test firstoffset(actual[1]) == 1
-    @test firstoffset(actual[2]) == 3
+    @test Traiter.firstoffset(actual[1]) == 1
+    @test Traiter.firstoffset(actual[2]) == 3
 end
 
 @testset "Parser.remove_overlapping!" begin

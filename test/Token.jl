@@ -38,25 +38,17 @@ end
 @testset "Token.firstoffset" begin
     ra = Rule("rulea", r"aa")
     tkn = Token(ra, match(ra.regex, "..aa.."))
-    @test firstoffset(tkn) == 3
-
-    # tkn = Token(ra, Dict("aa" => Group("11", 1, 2), "bb" => Group("33", 3, 4)))
-    # @test firstoffset(tkn, "aa") == 1
-    # @test firstoffset(tkn, "bb") == 3
+    @test Traiter.firstoffset(tkn) == 3
 end
 
 @testset "Token.lastoffset" begin
     ra = Rule("rulea", r"aa")
     tkn = Token(ra, match(ra.regex, "..aa.."))
 
-    @test lastoffset(2, "aa") == 3
-    @test lastoffset(match(ra.regex, "..aa..")) == 4
+    @test Traiter.lastoffset(2, "aa") == 3
+    @test Traiter.lastoffset(match(ra.regex, "..aa..")) == 4
 
-    @test lastoffset(tkn) == 4
-
-    # tkn = Token(ra, Dict("aa" => Group("11", 1, 2), "bb" => Group("33", 3, 4)))
-    # @test lastoffset(tkn, "aa") == 2
-    # @test lastoffset(tkn, "bb") == 4
+    @test Traiter.lastoffset(tkn) == 4
 end
 
 @testset "Token.groupnames" begin
