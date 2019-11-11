@@ -5,7 +5,9 @@ struct Parser
     producers::Rules
 end
 
-function parse(parser::Parser, text::String)::Tokens
+Parser(; name="parser", scanners=[], replacers=[], producers=[]) = Parser(name, scanners, replacers, producers)
+
+function parse(parser, text)
     tokens = scan(parser.scanners, text)
     again = length(parser.replacers) > 0
     while again
@@ -14,7 +16,7 @@ function parse(parser::Parser, text::String)::Tokens
     produce(parser.producers, tokens, text)
 end
 
-function scan(rules::Rules, text::String)::Tokens
+function scan(rules, text)
     tokens = Token[]
     matches = getmatches(rules, text)
 
@@ -26,7 +28,7 @@ function scan(rules::Rules, text::String)::Tokens
     tokens
 end
 
-function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
+function replace(rules, tokens, text)
     replaced = Token[]
     tokentext = token_text(tokens)
     matches = getmatches(rules, tokentext)
@@ -51,7 +53,7 @@ function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
     replaced, again
 end
 
-function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
+function produce(rules, tokens, text)
     produced = Token[]
     tokentext = token_text(tokens)
     matches = getmatches(rules, tokentext)
@@ -66,31 +68,29 @@ function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
     produced
 end
 
-function token_text(tokens::Tokens)::String
-    join([t.rule.name for t in tokens], TOKEN_SEPARATOR) * TOKEN_SEPARATOR
+function token_text(tokens)
+    join([t.rule.name for t in tokens], token_separator) * token_separator
 end
 
-function getmatches(rules::Rules, text::String)::Tokens
+function getmatches(rules, text)
     pairs = [(r, collect(eachmatch(r.regex, text))) for r in rules]
     matches = [Token(p[1], m) for p in pairs for m in p[2]]
     sort!(matches, by = x -> firstoffset(x), alg = MergeSort)
 end
 
-function remove_overlapping!(tokens::Tokens, token::Token)
+function remove_overlapping!(tokens, token)
     while length(tokens) > 0 && firstoffset(tokens[1]) <= lastoffset(token)
         popfirst!(tokens)
     end
 end
 
-function tokenindex(tokentext::String, idx::Integer)
-    length(collect(eachmatch(TOKEN_SEPARATOR_RE, tokentext[1:idx])))
+function tokenindex(tokentext, idx)
+    length(collect(eachmatch(token_separator_re, tokentext[1:idx])))
 end
-firstindex(tokentext::String, idx::Integer) = tokenindex(tokentext, idx) + 1
-lastindex(tokentext::String, idx::Integer) = tokenindex(tokentext, idx)
+firstindex(tokentext, idx) = tokenindex(tokentext, idx) + 1
+lastindex(tokentext, idx) = tokenindex(tokentext, idx)
 
-function merge_tokens(
-    token::Token, tokens::Tokens, tokentext::String, text::String
-)::Tuple{Token,Integer,Integer}
+function merge_tokens(token, tokens, tokentext, text)
     groups = GroupDict()
     names = groupnames(token.match)
     for (i, value) in enumerate(token.match.captures)
