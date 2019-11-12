@@ -21,7 +21,7 @@ function tokenize(re)
     word = r"(?<! [\\] ) (?<! \(\?< ) \b (?<word> [a-z]\w* ) \b "xi
     Base.replace(
         re,
-        word => SubstitutionString(raw"\g<word>" * token_separator),
+        word => SubstitutionString(raw"(?: \g<word>" * token_separator * " )"),
     )
 end
 

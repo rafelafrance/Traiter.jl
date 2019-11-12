@@ -1,9 +1,9 @@
 @testset "rule" begin
 
 @testset "rule.tokenize" begin
-    @test Traiter.tokenize("aa bb") == "aa; bb;"
-    @test Traiter.tokenize(raw"\b aa bb") == raw"\b aa; bb;"
-    @test Traiter.tokenize(raw"(?<aa> bb) cc") == raw"(?<aa> bb;) cc;"
+    @test Traiter.tokenize("aa bb") == "(?: aa; ) (?: bb; )"
+    @test Traiter.tokenize(raw"\b aa bb") == raw"\b (?: aa; ) (?: bb; )"
+    @test Traiter.tokenize(raw"(?<aa> bb) cc") == raw"(?<aa> (?: bb; )) (?: cc; )"
 end
 
 
@@ -29,10 +29,10 @@ end
 end
 
 @testset "rule.replacer" begin
-    @test replacer("test", "aa") == Rule("test", r"\b (?<test> aa; )"xi)
+    @test replacer("test", "aa") == Rule("test", r"\b (?<test> (?:aa;) )"xi)
     @test replacer("test", ["aa", "bb"]) == Rule(
         "test",
-        r"\b (?<test> aa; | bb; )"xi,
+        r"\b (?<test> (?: aa; ) | (?: bb; ) )"xi,
     )
 end
 
@@ -40,12 +40,12 @@ end
     dummy(x) = x + 1
     @test producer(dummy, "aa") == Rule(
         "producer_1",
-        r"\b (?<producer_1> aa; )"xi,
+        r"\b (?<producer_1> (?: aa; ) )"xi,
         dummy,
     )
     @test producer(dummy, ["aa", "bb"]) == Rule(
         "producer_2",
-        r"\b (?<producer_2> aa; | bb; )"xi,
+        r"\b (?<producer_2> (?: aa; ) | (?: bb; ) )"xi,
         dummy,
     )
 end
