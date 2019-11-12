@@ -1,6 +1,3 @@
-const token_separator = ";"
-const token_separator_re = Regex(token_separator)
-
 struct Rule
     name::String
     regex::Regex
@@ -8,6 +5,9 @@ struct Rule
 end
 
 const Rules = Array{Rule}
+
+const token_separator = ";"
+const token_separator_re = Regex(token_separator)
 
 Rule(name, regex) = Rule(name, regex, nothing)
 

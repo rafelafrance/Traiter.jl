@@ -6,18 +6,20 @@
     # It gets all captures from the regex
     m = match(r.regex, "..aabbcc..")
     actual = Token(r, m)
-    expect = Token(r, Dict("r" => Group("aabbcc", 3, 8),
-                           "a" => Group("aa", 3, 4),
-                           "b" => Group("bb", 5, 6),
-                           "c" => Group("cc", 7, 8)))
+    expect = Token(r, Dict(
+        "r" => Group("aabbcc", 3, 8),
+        "a" => Group("aa", 3, 4),
+        "b" => Group("bb", 5, 6),
+        "c" => Group("cc", 7, 8)))
     @test actual == expect
 
     # It does not add empty capture groups
     m = match(r.regex, "..aacc..")
     actual = Token(r, m)
-    expect = Token(r, Dict("r" => Group("aacc", 3, 6),
-                           "a" => Group("aa", 3, 4),
-                           "c" => Group("cc", 5, 6)))
+    expect = Token(r, Dict(
+        "r" => Group("aacc", 3, 6),
+        "a" => Group("aa", 3, 4),
+        "c" => Group("cc", 5, 6)))
     @test actual == expect
 end
 
@@ -59,7 +61,7 @@ end
 end
 
 @testset "token.addgroup!(::GroupDict, ::String, ::Group)" begin
-    groups = Traiter.GroupDict()
+    groups = GroupDict()
     groups["aa"] = Groups([Group("11", 1, 11)])
     groups["bb"] = Groups([Group("22", 2, 22)])
     group = Group("22", 2, 22)
@@ -67,7 +69,7 @@ end
     # It adds a new key
     actual = copy(groups)
     Traiter.addgroup!(actual, "cc", group)
-    expect = Traiter.GroupDict()
+    expect = GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     expect["cc"] = Groups([Group("22", 2, 22)])
@@ -76,7 +78,7 @@ end
     # It does not add duplicates
     actual = copy(groups)
     Traiter.addgroup!(actual, "bb", group)
-    expect = Traiter.GroupDict()
+    expect = GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect
@@ -84,14 +86,14 @@ end
     # It appends to a set
     actual = copy(groups)
     Traiter.addgroup!(actual, "aa", group)
-    expect = Traiter.GroupDict()
+    expect = GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11), Group("22", 2, 22)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect
 end
 
 @testset "token.addgroup!(::GroupDict, ::String, ::Groups)" begin
-    groups = Traiter.GroupDict()
+    groups = GroupDict()
     groups["aa"] = Groups([Group("11", 1, 11)])
     groups["bb"] = Groups([Group("22", 2, 22)])
     group = Groups([Group("33", 1, 11)])
@@ -99,7 +101,7 @@ end
     # It unites the sets
     actual = copy(groups)
     Traiter.addgroup!(actual, "aa", group)
-    expect = Traiter.GroupDict()
+    expect = GroupDict()
     expect["aa"] = Groups([Group("11", 1, 11), Group("33", 1, 11)])
     expect["bb"] = Groups([Group("22", 2, 22)])
     @test actual == expect

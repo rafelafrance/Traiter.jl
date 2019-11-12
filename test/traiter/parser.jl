@@ -159,55 +159,66 @@ end
     rep2 = replacer("test", "yes yes")
 
     # It replaces one token
-    tokens = [Token(no, Dict()), Token(yes, Dict()), Token(no, Dict())]
+    tokens = [
+        Token(no, GroupDict()),
+        Token(yes, GroupDict()),
+        Token(no, GroupDict()),
+    ]
     (actual, flag) = replace([rep], tokens, "..yes..")
-    expect = [Token(no, Dict()), Token(rep, Dict()), Token(no, Dict())]
+    expect = [
+        Token(no, GroupDict()),
+        Token(rep, GroupDict()),
+        Token(no, GroupDict())
+    ]
     @test actual == expect
     @test flag
 
     # It replaces multiple tokens
     tokens = [
-        Token(no, Dict()),
-        Token(yes, Dict()), Token(yes, Dict()),
-        Token(no, Dict())
+        Token(no, GroupDict()),
+        Token(yes, GroupDict()), Token(yes, GroupDict()),
+        Token(no, GroupDict())
     ]
     (actual, flag) = replace([rep2], tokens, "..yes.yes.")
-    expect = [Token(no, Dict()), Token(rep2, Dict()), Token(no, Dict())]
+    expect = [
+        Token(no, GroupDict()),
+        Token(rep2, GroupDict()),
+        Token(no, GroupDict())]
     @test actual == expect
     @test flag
 
     # It replaces the first token
-    tokens = [Token(yes, Dict()), Token(no, Dict())]
+    tokens = [Token(yes, GroupDict()), Token(no, GroupDict())]
     (actual, flag) = replace([rep], tokens, "..yes..")
-    expect = [Token(rep, Dict()), Token(no, Dict())]
+    expect = [Token(rep, GroupDict()), Token(no, GroupDict())]
     @test actual == expect
     @test flag
 
     # It replaces the last token
-    tokens = [Token(no, Dict()), Token(yes, Dict())]
+    tokens = [Token(no, GroupDict()), Token(yes, GroupDict())]
     (actual, flag) = replace([rep], tokens, "..yes..")
-    expect = [Token(no, Dict()), Token(rep, Dict())]
+    expect = [Token(no, GroupDict()), Token(rep, GroupDict())]
     @test actual == expect
     @test flag
 
     # It replaces no tokens
-    tokens = [Token(no, Dict()), Token(no, Dict())]
+    tokens = [Token(no, GroupDict()), Token(no, GroupDict())]
     (actual, flag) = replace([rep], tokens, "..yes..")
-    expect = [Token(no, Dict()), Token(no, Dict())]
+    expect = [Token(no, GroupDict()), Token(no, GroupDict())]
     @test actual == expect
     @test !flag
 
     # It replaces all tokens
-    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    tokens = [Token(yes, GroupDict()), Token(yes, GroupDict())]
     (actual, flag) = replace([rep2], tokens, "..yes.yes.")
-    expect = [Token(rep2, Dict())]
+    expect = [Token(rep2, GroupDict())]
     @test actual == expect
     @test flag
 
     # It replaces multiple times
-    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    tokens = [Token(yes, GroupDict()), Token(yes, GroupDict())]
     (actual, flag) = replace([rep], tokens, "..yes.yes.")
-    expect = [Token(rep, Dict()), Token(rep, Dict())]
+    expect = [Token(rep, GroupDict()), Token(rep, GroupDict())]
     @test actual == expect
     @test flag
 end
@@ -221,49 +232,51 @@ end
     prod2 = producer(dummy, "yes yes")
 
     # It produces from one token
-    tokens = [Token(no, Dict()), Token(yes, Dict()), Token(no, Dict())]
+    tokens = [Token(no, GroupDict()),
+              Token(yes, GroupDict()),
+              Token(no, GroupDict())]
     actual = Traiter.produce([prod], tokens, "..yes..")
-    expect = [Token(prod, Dict())]
+    expect = [Token(prod, GroupDict())]
     @test actual == expect
 
     # It produces from multiple tokens
     tokens = [
-        Token(no, Dict()),
-        Token(yes, Dict()), Token(yes, Dict()),
-        Token(no, Dict())
+        Token(no, GroupDict()),
+        Token(yes, GroupDict()), Token(yes, GroupDict()),
+        Token(no, GroupDict())
     ]
     actual = Traiter.produce([prod2], tokens, "..yes.yes.")
-    expect = [Token(prod2, Dict())]
+    expect = [Token(prod2, GroupDict())]
     @test actual == expect
 
     # It produces from the first token
-    tokens = [Token(yes, Dict()), Token(no, Dict())]
+    tokens = [Token(yes, GroupDict()), Token(no, GroupDict())]
     actual = Traiter.produce([prod], tokens, "..yes..")
-    expect = [Token(prod, Dict())]
+    expect = [Token(prod, GroupDict())]
     @test actual == expect
 
     # It produces from the last token
-    tokens = [Token(no, Dict()), Token(yes, Dict())]
+    tokens = [Token(no, GroupDict()), Token(yes, GroupDict())]
     actual = Traiter.produce([prod], tokens, "..yes..")
-    expect = [Token(prod, Dict())]
+    expect = [Token(prod, GroupDict())]
     @test actual == expect
 
     # No products
-    tokens = [Token(no, Dict()), Token(no, Dict())]
+    tokens = [Token(no, GroupDict()), Token(no, GroupDict())]
     actual = Traiter.produce([prod], tokens, "..yes..")
     expect = []
     @test actual == expect
 
     # It produces from all tokens
-    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    tokens = [Token(yes, GroupDict()), Token(yes, GroupDict())]
     actual = Traiter.produce([prod2], tokens, "..yes.yes.")
-    expect = [Token(prod2, Dict())]
+    expect = [Token(prod2, GroupDict())]
     @test actual == expect
 
     # It produces multiple times
-    tokens = [Token(yes, Dict()), Token(yes, Dict())]
+    tokens = [Token(yes, GroupDict()), Token(yes, GroupDict())]
     actual = Traiter.produce([prod], tokens, "..yes.yes.")
-    expect = [Token(prod, Dict()), Token(prod, Dict())]
+    expect = [Token(prod, GroupDict()), Token(prod, GroupDict())]
     @test actual == expect
 end
 
