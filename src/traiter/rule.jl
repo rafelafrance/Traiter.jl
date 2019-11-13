@@ -54,13 +54,9 @@ function replacer(name::String, regex::Patterns, action::TokenAction = nothing)
     Rule(name, regex, action)
 end
 
-producer_count = 0
 function producer(action::TraitAction, regex::Patterns)
-    global producer_count
-    producer_count += 1
-    name = "producer_$producer_count"
     regex = build(regex)
     regex = tokenize(regex)
-    regex = Regex(raw"\b" * "(?<$name> $regex )", "xi")
-    Rule(name, regex, action)
+    regex = Regex(raw"\b" * "(?: $regex )", "xi")
+    Rule("producer", regex, action)
 end

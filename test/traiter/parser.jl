@@ -317,7 +317,6 @@ end
     expect = [Token(prod, GroupDict(
         "yes" => Groups([Group("yes", 3, 5)]),
         "repl" => Groups([Group("yes", 3, 5)]),
-        prod.name => Groups([Group("yes", 3, 5)]),
     ))]
     @test actual == expect
 
@@ -328,7 +327,6 @@ end
         "yes" => Groups([Group("yes", 3, 5)]),
         "repl2_1" => Groups([Group("yes", 3, 5)]),
         "repl2_2" => Groups([Group("yes", 3, 5)]),
-        prod2.name => Groups([Group("yes", 3, 5)]),
     ))]
     @test actual == expect
 end

@@ -61,13 +61,13 @@ end
 @testset "rule.producer" begin
     dummy(x) = x + 1
     @test producer(dummy, "aa") == Rule(
-        "producer_1",
-        r"\b (?<producer_1> (?: aa; ) )"xi,
+        "producer",
+        r"\b (?: (?: aa; ) )"xi,
         dummy,
     )
     @test producer(dummy, ["aa", "bb"]) == Rule(
-        "producer_2",
-        r"\b (?<producer_2> (?: aa; ) | (?: bb; ) )"xi,
+        "producer",
+        r"\b (?: (?: aa; ) | (?: bb; ) )"xi,
         dummy,
     )
 end
