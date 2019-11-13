@@ -1,4 +1,6 @@
-const Action = Union{Function,Nothing}
+const TokenAction = Union{Function,Nothing}
+const TraitAction = Union{Function,Nothing}
+const Action = Union{TokenAction,TraitAction}
 const Patterns = Union{String,Array{String}}
 
 struct Rule
@@ -33,19 +35,19 @@ function tokenize(regex::String)
     )
 end
 
-function fragment(name::String, regex::Patterns, action::Action = nothing)
+function fragment(name::String, regex::Patterns, action::TokenAction = nothing)
     regex = build(regex)
     regex = Regex("(?<$name> $regex )", "xi")
     Rule(name, regex, action)
 end
 
-function keyword(name::String, regex::Patterns, action::Action = nothing)
+function keyword(name::String, regex::Patterns, action::TokenAction = nothing)
     regex = build(regex)
     regex = Regex(raw"\b" * "(?<$name> $regex )" * raw"\b", "xi")
     Rule(name, regex, action)
 end
 
-function replacer(name::String, regex::Patterns, action::Action = nothing)
+function replacer(name::String, regex::Patterns, action::TokenAction = nothing)
     regex = build(regex)
     regex = tokenize(regex)
     regex = Regex(raw"\b" * "(?<$name> $regex )", "xi")
@@ -53,7 +55,7 @@ function replacer(name::String, regex::Patterns, action::Action = nothing)
 end
 
 producer_count = 0
-function producer(action::Function, regex::Patterns)
+function producer(action::TraitAction, regex::Patterns)
     global producer_count
     producer_count += 1
     name = "producer_$producer_count"

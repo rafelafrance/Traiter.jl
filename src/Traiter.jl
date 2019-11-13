@@ -1,7 +1,11 @@
 module Traiter
 
-export Trait, Traits, Rule, Rules, fragment, keyword, replacer, producer,
-       Group, Groups, GroupDict, Token, Tokens, forget!, Parser, parse
+export Trait, Traits,
+       Rule, Rules, fragment, keyword, replacer, producer,
+       TokenAction, TraitAction,
+       Group, Groups, GroupDict,
+       Token, Tokens, forget!,
+       Parser, parse
 
 import Base.parse, Base.==, Base.replace
 import DataStructures.OrderedSet
