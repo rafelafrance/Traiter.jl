@@ -5,9 +5,22 @@ struct Parser
     producers::Rules
 end
 
-Parser(; name="parser", scanners=[], replacers=[], producers=[]) = Parser(name, scanners, replacers, producers)
+Parser(; name = "parser", scanners = [], replacers = [], producers = []) =
+    Parser(name, scanners, replacers, producers)
 
-function parse(parser, text)
+token_text(tokens::Tokens)::String =
+    join([t.rule.name for t in tokens], token_separator) * token_separator
+
+tokenindex(tokentext::String, idx::Integer)::Integer =
+    length(collect(eachmatch(token_separator_re, tokentext[1:idx])))
+
+firstindex(tokentext::String, idx::Integer)::Integer =
+    tokenindex(tokentext, idx) + 1
+
+lastindex(tokentext::String, idx::Integer)::Integer =
+    tokenindex(tokentext, idx)
+
+function parse(parser::Parser, text::String)::Tokens
     tokens = scan(parser.scanners, text)
     again = length(parser.replacers) > 0
     while again
@@ -16,19 +29,22 @@ function parse(parser, text)
     produce(parser.producers, tokens, text)
 end
 
-function scan(rules, text)
+function scan(rules::Rules, text::String)::Tokens
     tokens = Token[]
     matches = getmatches(rules, text)
 
     while length(matches) > 0
         match = popfirst!(matches)
+        if !isnothing(match.rule.action)
+            match.rule.action(match)
+        end
         push!(tokens, match)
         remove_overlapping!(matches, match)
     end
     tokens
 end
 
-function replace(rules, tokens, text)
+function replace(rules::Rules, tokens::Tokens, text::String)::Tuple{Tokens,Bool}
     replaced = Token[]
     tokentext = token_text(tokens)
     matches = getmatches(rules, tokentext)
@@ -37,8 +53,10 @@ function replace(rules, tokens, text)
     prev_first, prev_last = 1, 0
     while length(matches) > 0
         match = popfirst!(matches)
-        token, first_idx, last_idx = merge_tokens(
-            match, tokens, tokentext, text)
+        token, first_idx, last_idx = merge_tokens(match, tokens, tokentext, text)
+        if !isnothing(match.rule.action)
+            match.rule.action(match)
+        end
         if prev_last + 1 != first_idx
             append!(replaced, tokens[prev_first:first_idx-1])
         end
@@ -53,7 +71,7 @@ function replace(rules, tokens, text)
     replaced, again
 end
 
-function produce(rules, tokens, text)
+function produce(rules::Rules, tokens::Tokens, text::String)::Tokens
     produced = Token[]
     tokentext = token_text(tokens)
     matches = getmatches(rules, tokentext)
@@ -68,29 +86,24 @@ function produce(rules, tokens, text)
     produced
 end
 
-function token_text(tokens)
-    join([t.rule.name for t in tokens], token_separator) * token_separator
-end
-
-function getmatches(rules, text)
+function getmatches(rules::Rules, text::String)::Tokens
     pairs = [(r, collect(eachmatch(r.regex, text))) for r in rules]
     matches = [Token(p[1], m) for p in pairs for m in p[2]]
     sort!(matches, by = x -> firstoffset(x), alg = MergeSort)
 end
 
-function remove_overlapping!(tokens, token)
+function remove_overlapping!(tokens::Tokens, token::Token)
     while length(tokens) > 0 && firstoffset(tokens[1]) <= lastoffset(token)
         popfirst!(tokens)
     end
 end
 
-function tokenindex(tokentext, idx)
-    length(collect(eachmatch(token_separator_re, tokentext[1:idx])))
-end
-firstindex(tokentext, idx) = tokenindex(tokentext, idx) + 1
-lastindex(tokentext, idx) = tokenindex(tokentext, idx)
-
-function merge_tokens(token, tokens, tokentext, text)
+function merge_tokens(
+    token::Token,
+    tokens::Tokens,
+    tokentext::String,
+    text::String,
+)::Tuple{Token,Integer,Integer}
     groups = GroupDict()
     names = groupnames(token.match)
     for (i, value) in enumerate(token.match.captures)

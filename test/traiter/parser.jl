@@ -106,7 +106,7 @@ end
     matched = Token(full, match(full.regex, tokentext))
 
     actual = Traiter.merge_tokens(matched, tokens, tokentext, text)
-    expect = Token(full, Dict(
+    expect = Token(full, GroupDict(
         "first" => Groups([Group("john", 3, 6)]),
         "full" => Groups([Group("john smythe", 3, 13)]),
         "last"  => Groups([Group("smythe", 8, 13)]),
@@ -120,7 +120,8 @@ end
     rule_b = Rule("ruleb", r"bb")
     rule_c = Rule("rulec", r"cc")
     rule_bc = Rule("rulebc", r"bc")
-    scanners = [rule_a, rule_b, rule_c, rule_bc]
+    rule_f = Rule("rule_f", r"ff", forget!)
+    scanners = [rule_a, rule_b, rule_c, rule_bc, rule_f]
 
     # It works
     expect = [Token(rule_b, RegexMatch("bb", [], 3, [], r"bb"))]
@@ -149,6 +150,13 @@ end
               Token(rule_c, RegexMatch("cc", [], 3, [], r"cc"))]
     actual = Traiter.scan(scanners, "bbcc")
     @test actual == expect
+
+    # It executes the scan function
+    expect = [Token(rule_b, RegexMatch("bb", [], 1, [], r"bb")),
+              Token(rule_c, RegexMatch("cc", [], 3, [], r"cc")),
+              Token(rule_f, GroupDict(), RegexMatch("ff", [], 5, [], r"ff"))]
+    actual = Traiter.scan(scanners, "bbccff")
+    @test actual == expect
 end
 
 @testset "parser.replace" begin
@@ -157,6 +165,8 @@ end
     no = replacer("no", "no")
     rep = replacer("test", "yes")
     rep2 = replacer("test", "yes yes")
+    forgetit = replacer("forgetit", "ff")
+    forgotit = replacer("forgotit", "(?<forgot>forgetit)", forget!)
 
     # It replaces one token
     tokens = [
@@ -219,6 +229,17 @@ end
     tokens = [Token(yes, GroupDict()), Token(yes, GroupDict())]
     (actual, flag) = replace([rep], tokens, "..yes.yes.")
     expect = [Token(rep, GroupDict()), Token(rep, GroupDict())]
+    @test actual == expect
+    @test flag
+
+    # It calls the replacer function
+    tokens = [Token(yes, GroupDict()),
+              Token(yes, GroupDict()),
+              Token(forgetit, GroupDict())]
+    (actual, flag) = replace([rep, forgotit], tokens, "..yes.yes.forget.")
+    expect = [Token(rep, GroupDict()),
+              Token(rep, GroupDict()),
+              Token(forgotit, GroupDict())]
     @test actual == expect
     @test flag
 end
@@ -293,7 +314,7 @@ end
     # It parses
     parser = Parser("Test", [scn], [rep], [prod])
     actual = parse(parser, "..yes..no..")
-    expect = [Token(prod, Dict(
+    expect = [Token(prod, GroupDict(
         "yes" => Groups([Group("yes", 3, 5)]),
         "repl" => Groups([Group("yes", 3, 5)]),
         prod.name => Groups([Group("yes", 3, 5)]),
@@ -303,7 +324,7 @@ end
     # It does a double replace
     parser = Parser("Test", [scn], [rep2_1, rep2_2], [prod2])
     actual = parse(parser, "..yes..no..")
-    expect = [Token(prod2, Dict(
+    expect = [Token(prod2, GroupDict(
         "yes" => Groups([Group("yes", 3, 5)]),
         "repl2_1" => Groups([Group("yes", 3, 5)]),
         "repl2_2" => Groups([Group("yes", 3, 5)]),

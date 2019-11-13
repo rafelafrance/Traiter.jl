@@ -4,11 +4,9 @@ struct Group
     last::Int64
 end
 
-Group(v::SubString{String}, f::Integer, l::Integer) = Group(string(v), f, l)
+Group(v::SubString{AbstractString}, f::Integer, l::Integer) = Group(string(v), f, l)
 
 const Groups = OrderedSet{Group}
 const GroupDict = Dict{String,Groups}
 
-function ==(a::Group, b::Group)
-    a.value == b.value && a.first == b.first && a.last == b.last
-end
+==(a::Group, b::Group) = (a.value, a.first, a.last) == (b.value, b.first, b.last)

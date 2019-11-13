@@ -107,4 +107,14 @@ end
     @test actual == expect
 end
 
+@testset "token.forget!" begin
+    ra = Rule("rulea", r"aa")
+    groups = GroupDict()
+    groups["aa"] = Groups([Group("11", 1, 11)])
+    groups["bb"] = Groups([Group("22", 2, 22)])
+    tkn = Token(ra, groups)
+    forget!(tkn)
+    @test tkn == Token(ra, GroupDict())
+end
+
 end

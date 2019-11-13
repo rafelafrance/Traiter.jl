@@ -13,26 +13,48 @@ end
 end
 
 @testset "rule.fragment" begin
+    func(x) = 2x
     @test fragment("test", "aa") == Rule("test", r"(?<test> aa )"xi)
     @test fragment("test", ["aa", "bb"]) == Rule(
         "test",
         r"(?<test> aa | bb )"xi,
     )
+    @test fragment("test", ["aa", "bb"], func) == Rule(
+        "test",
+        r"(?<test> aa | bb )"xi,
+        func,
+    )
 end
 
 @testset "rule.keyword" begin
+    func(x) = 2x
     @test keyword("test", "aa") == Rule("test", r"\b(?<test> aa )\b"xi)
     @test keyword("test", ["aa", "bb"]) == Rule(
         "test",
         r"\b(?<test> aa | bb )\b"xi,
     )
+    @test keyword("test", ["aa", "bb"]) == Rule(
+        "test",
+        r"\b(?<test> aa | bb )\b"xi,
+    )
+    @test keyword("test", ["aa", "bb"], func) == Rule(
+        "test",
+        r"\b(?<test> aa | bb )\b"xi,
+        func,
+    )
 end
 
 @testset "rule.replacer" begin
+    func(x) = 2x
     @test replacer("test", "aa") == Rule("test", r"\b (?<test> (?:aa;) )"xi)
     @test replacer("test", ["aa", "bb"]) == Rule(
         "test",
         r"\b (?<test> (?: aa; ) | (?: bb; ) )"xi,
+    )
+    @test replacer("test", ["aa", "bb"], func) == Rule(
+        "test",
+        r"\b (?<test> (?: aa; ) | (?: bb; ) )"xi,
+        func,
     )
 end
 

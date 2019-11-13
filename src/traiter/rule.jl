@@ -1,7 +1,10 @@
+const Action = Union{Function,Nothing}
+const Patterns = Union{String,Array{String}}
+
 struct Rule
     name::String
     regex::Regex
-    action::Union{Function,Nothing}
+    action::Action
 end
 
 const Rules = Array{Rule}
@@ -9,52 +12,53 @@ const Rules = Array{Rule}
 const token_separator = ";"
 const token_separator_re = Regex(token_separator)
 
-Rule(name, regex) = Rule(name, regex, nothing)
+Rule(name::String, regex::Regex) = Rule(name, regex, nothing)
+
+build(str::AbstractString) = join(split(str), " ")
+build(strs::Union{Array{String},Array{SubString{String}}}) =
+    build(join(strs, " | "))
+build(regex::Regex) = build(regex.pattern)
 
 function ==(a::Rule, b::Rule)
     a_regex = filter(x -> !isspace(x), a.regex.pattern)
     b_regex = filter(x -> !isspace(x), b.regex.pattern)
-    a.name == b.name && a_regex == b_regex && a.action == b.action
+    (a.name, a_regex, a.action) == (b.name, b_regex, b.action)
 end
 
-function tokenize(re)
+function tokenize(regex::String)
     word = r"(?<! [\\] ) (?<! \(\?< ) \b (?<word> [a-z]\w* ) \b "xi
     Base.replace(
-        re,
+        regex,
         word => SubstitutionString(raw"(?: \g<word>" * token_separator * " )"),
     )
 end
 
-build(str::AbstractString) = join(split(str), " ")
-build(strs::Union{Array{String},Array{SubString{String}}}) = build(join(strs, " | "))
-build(re::Regex) = build(re.pattern)
-
-function fragment(name, re)
-    re = build(re)
-    re = Regex("(?<$name> $re )", "xi")
-    Rule(name, re)
+function fragment(name::String, regex::Patterns, action::Action = nothing)
+    regex = build(regex)
+    regex = Regex("(?<$name> $regex )", "xi")
+    Rule(name, regex, action)
 end
 
-function keyword(name, re)
-    re = build(re)
-    re = Regex(raw"\b" * "(?<$name> $re )" * raw"\b", "xi")
-    Rule(name, re)
+function keyword(name::String, regex::Patterns, action::Action = nothing)
+    regex = build(regex)
+    regex = Regex(raw"\b" * "(?<$name> $regex )" * raw"\b", "xi")
+    Rule(name, regex, action)
 end
 
-function replacer(name, re)
-    re = build(re)
-    re = tokenize(re)
-    re = Regex(raw"\b" * "(?<$name> $re )", "xi")
-    Rule(name, re)
+function replacer(name::String, regex::Patterns, action::Action = nothing)
+    regex = build(regex)
+    regex = tokenize(regex)
+    regex = Regex(raw"\b" * "(?<$name> $regex )", "xi")
+    Rule(name, regex, action)
 end
 
 producer_count = 0
-function producer(action, re)
+function producer(action::Function, regex::Patterns)
     global producer_count
     producer_count += 1
     name = "producer_$producer_count"
-    re = build(re)
-    re = tokenize(re)
-    re = Regex(raw"\b" * "(?<$name> $re )", "xi")
-    Rule(name, re, action)
+    regex = build(regex)
+    regex = tokenize(regex)
+    regex = Regex(raw"\b" * "(?<$name> $regex )", "xi")
+    Rule(name, regex, action)
 end

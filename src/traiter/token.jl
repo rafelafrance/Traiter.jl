@@ -1,4 +1,4 @@
-struct Token
+mutable struct Token
     rule::Rule
     groups::GroupDict
     match::Union{RegexMatch,Nothing}
@@ -37,19 +37,15 @@ function Token(rule::Rule, tokens::Tokens)
     Token(rule, groups)
 end
 
-function ==(a::Token, b::Token)
-    a.rule == b.rule && a.groups == b.groups
-end
+==(a::Token, b::Token) = (a.rule, a.groups) == (b.rule, b.groups)
+firstoffset(t::Token)::Integer = minimum(g -> minimum(x -> x.first, g), values(t.groups))
+lastoffset(t::Token)::Integer = maximum(g -> maximum(x -> x.last, g), values(t.groups))
+lastoffset(i::Integer, s::Union{String,SubString{String}})::Integer = i + length(s) - 1
+lastoffset(m::RegexMatch)::Integer = lastoffset(m.offset, m.match)
+groupnames(match::RegexMatch)::Dict{Integer,String} = Base.PCRE.capture_names(match.regex.regex)
+forget!(t::Token) = t.groups = GroupDict()
 
-firstoffset(t::Token) = minimum(g -> minimum(x -> x.first, g), values(t.groups))
-
-lastoffset(t::Token) = maximum(g -> maximum(x -> x.last, g), values(t.groups))
-lastoffset(i::Integer, s::Union{String,SubString{String}}) = i + length(s) - 1
-lastoffset(m::RegexMatch) = lastoffset(m.offset, m.match)
-
-groupnames(match) = Base.PCRE.capture_names(match.regex.regex)
-
-function addgroup!(groups, key, values::Groups)
+function addgroup!(groups::GroupDict, key::String, values::Groups)
     if haskey(groups, key)
         union!(groups[key], values)
     else
@@ -57,7 +53,7 @@ function addgroup!(groups, key, values::Groups)
     end
 end
 
-function addgroup!(groups, key, value::Group)
+function addgroup!(groups::GroupDict, key::String, value::Group)
     if haskey(groups, key)
         push!(groups[key], value)
     else
