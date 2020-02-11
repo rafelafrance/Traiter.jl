@@ -1,62 +1,57 @@
 mutable struct Token
-    rule::Rule
-    groups::GroupDict
-    match::Union{RegexMatch,Nothing}
+    text::Int64
+    norm::Int64         # Normalized text
+    lemma::Int64
+    pos::Int64
+    chars::UnitRange{Int32}
+    Token(t, n, c) = new(t, n, 0, 0, c)
+    Token(t, n, f, l) = new(t, n, 0, 0, UnitRange(f, l))
 end
 
+
+==(a::Token, b::Token) =
+    (a.text, a.norm, a.chars, a.lemma, a.pos) ==
+    (b.text, b.norm, b.chars, b.lemma, b.pos)
+
+
+mutable struct Vocabulary
+    key::Int64
+    splitter::Regex
+    int2str::Dict{Int64,String}
+    str2int::Dict{String,Int64}
+    Vocabulary() = new(0, r"[^\s,;:.\"]+"xi, Dict(), Dict())
+end
+
+
+const Str = Union{String,SubString{String}}
+const Strs = Union{Array{String},Array{SubString{String}}}
 const Tokens = Array{Token}
 
-Token(rule::Rule, groups::GroupDict) = Token(rule, groups, nothing)
 
-function Token(rule::Rule, dict::Dict{String,Group})
-    Token(rule, GroupDict(k => Groups([v]) for (k, v) in dict))
+function tokenize(vocab::Vocabulary, str::Str)::Tokens
+    tokens = Token[]
+    range = findfirst(vocab.splitter, str)
+    while !isnothing(range)
+        word = str[range]
+        token = Token(
+            add(vocab, word),
+            add(vocab, lowercase(word)),
+            range
+        )
+        push!(tokens, token)
+        range = findnext(vocab.splitter, str, range.stop + 1)
+    end
+    tokens
 end
 
-function Token(rule::Rule, match::RegexMatch)
-    groups = GroupDict()
-    for (idx, name) in groupnames(match)
-        value = match.captures[idx]
-        if !isnothing(value)
-            first = match.offsets[idx]
-            last = lastoffset(first, value)
-            addgroup!(groups, name, Group(value, first, last))
-        end
-    end
-    group = Group(match.match, match.offset, lastoffset(match))
-    addgroup!(groups, rule.name, group)
-    Token(rule, groups, match)
-end
 
-function Token(rule::Rule, tokens::Tokens)
-    groups = GroupDict()
-    for token in tokens
-        for (name, group) in token.groups
-            addgroup!(groups, name, group)
-        end
+function add(vocab::Vocabulary, str::Str)::Integer
+    key = get(vocab.str2int, str, 0)
+    if key == 0
+        vocab.key += 1
+        vocab.int2str[vocab.key] = str
+        vocab.str2int[str] = vocab.key
+        key = vocab.key
     end
-    Token(rule, groups)
-end
-
-==(a::Token, b::Token) = (a.rule, a.groups) == (b.rule, b.groups)
-firstoffset(t::Token)::Integer = minimum(g -> minimum(x -> x.first, g), values(t.groups))
-lastoffset(t::Token)::Integer = maximum(g -> maximum(x -> x.last, g), values(t.groups))
-lastoffset(i::Integer, s::Union{String,SubString{String}})::Integer = i + length(s) - 1
-lastoffset(m::RegexMatch)::Integer = lastoffset(m.offset, m.match)
-groupnames(match::RegexMatch)::Dict{Integer,String} = Base.PCRE.capture_names(match.regex.regex)
-forget!(t::Token) = t.groups = GroupDict()
-
-function addgroup!(groups::GroupDict, key::String, values::Groups)
-    if haskey(groups, key)
-        union!(groups[key], values)
-    else
-        groups[key] = values
-    end
-end
-
-function addgroup!(groups::GroupDict, key::String, value::Group)
-    if haskey(groups, key)
-        push!(groups[key], value)
-    else
-        groups[key] = Groups([value])
-    end
+    key
 end

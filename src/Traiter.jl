@@ -1,19 +1,19 @@
 module Traiter
 
 export Trait, Traits,
-       Rule, Rules, fragment, keyword, replacer, producer,
-       TokenAction, TraitAction,
-       Group, Groups, GroupDict,
-       Token, Tokens, forget!,
-       Parser, parse
+       Vocabulary, Token, tokenize, add,
+       Rules, Rule, Predicate,
+       match
 
-import Base.parse, Base.==, Base.replace
-import DataStructures.OrderedSet
+import Base.==
+import DataStructures.Stack
+
 
 abstract type Trait end
 const Traits = Array{Trait}
 
-for i in ["rule", "group", "token", "parser"]
+
+for i in ["token", "rule", "matcher"]
   include("traiter/$(i).jl")
 end
 
