@@ -1,17 +1,15 @@
+@enum TokenAttr text=1 norm lemma pos
+
+
 mutable struct Token
-    text::Int64
-    norm::Int64         # Normalized text
-    lemma::Int64
-    pos::Int64
-    chars::UnitRange{Int32}
-    Token(t, n, c) = new(t, n, 0, 0, c)
-    Token(t, n, f, l) = new(t, n, 0, 0, UnitRange(f, l))
+    attrs::Array{}
+    chars::UnitRange{SIZE}
+    Token(t, n, c) = new([t, n, 0, 0], c)
+    Token(t, n, f, l) = new([t, n, 0, 0], UnitRange(f, l))
 end
 
 
-==(a::Token, b::Token) =
-    (a.text, a.norm, a.chars, a.lemma, a.pos) ==
-    (b.text, b.norm, b.chars, b.lemma, b.pos)
+==(a::Token, b::Token) = (a.attrs, a.chars) == (b.attrs, b.chars)
 
 
 mutable struct Vocabulary

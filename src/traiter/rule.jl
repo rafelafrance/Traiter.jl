@@ -1,11 +1,11 @@
-const Phrase = Array[]
+const Phrase = Vector{SIZE}
 
 mutable struct Predicate
-    field::Int64
-    name::Int64     # Information for matched tokens
-    phrases::UnitRange{Int32}
-    rep_lo::Int32
-    rep_hi::Int32
+    field::SIZE
+    name::SIZE     # Information for matched tokens
+    phrases::UnitRange{SIZE}
+    rep_lo::SIZE
+    rep_hi::SIZE
     greedy::Bool
     Predicate() = new(0, 0, UnitRange(0, 0), 0, 0, true)
 end

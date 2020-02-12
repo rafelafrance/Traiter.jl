@@ -1,16 +1,16 @@
 struct Backtrack
-    token_idx::Int64
-    pred_idx::Int64
-    phrase_idx::Int64
-    repeat_idx::Int64
+    token_idx::SIZE
+    pred_idx::SIZE
+    phrase_idx::SIZE
+    repeat_idx::SIZE
 end
 
 
 struct Match
     rule::Rule
-    first_token::Int64
-    last_token::Int64
-    predicates::Array{Predicate}
+    first_token::SIZE
+    last_token::SIZE
+    predicates::Vector{Predicate}
 end
 
 

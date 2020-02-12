@@ -1,5 +1,8 @@
 module Traiter
 
+const SIZE = UInt32
+
+
 export Trait, Traits,
        Vocabulary, Token, tokenize, add,
        Rules, Rule, Predicate,
