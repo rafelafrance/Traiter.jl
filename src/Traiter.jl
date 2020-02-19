@@ -1,10 +1,11 @@
 module Traiter
 
-const SIZE = UInt32
+# const Int = UInt32
 
 
-export Trait, Traits,
-       Vocabulary, Token, tokenize, add,
+export Trait, Traits, Int,
+       Vocabulary, Token, Tokens, tokenize, add, token,
+       TokenGenus, WORD, NUM, PUNCT,
        Rules, Rule, Predicate,
        match
 
