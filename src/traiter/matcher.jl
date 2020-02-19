@@ -10,17 +10,17 @@ struct Match
     rule::Rule
     first_token::INT
     last_token::INT
-    token2pred::Predicates
+    token2pred::Vector{Predicate}
     # Match() = new(Nothing, 0, 0, [])
 end
 
+function isin(tokens::Tokens, token_idx::INT, phrase_idx::INT, repeat_idx::INT)::Bool
+end
 
-const Matches = Vector{Match}
 
-
-function match(rules::Rules, tokens::Tokens)::Matches
+function match(rules::Rules, tokens::Tokens)::Vector{Match}
     stack::Stack{Backtrack} = Stack()
-    matches::Matches = []
+    matches::Vector{Match} = []
     token_idx = 1
 
     while token_idx <= length(tokens)
@@ -36,12 +36,12 @@ function match(rules::Rules, tokens::Tokens)::Matches
             while pred_idx <= length(rule.predicates)
                 pred = rule.predicates[pred_idx]
 
-                result = pred.func(tokens, token_idx, phrase_idx, repeat_idx)
+                success = pred.func(tokens, token_idx, phrase_idx, repeat_idx)
 
                 # A candidate match
-                if result.success == true
+                if success
                     self.stack.push(Backtrack(
-                        token_idx, rule_idx, phrase_idx, repeat_idx))
+                        pred_token, pred_idx, phrase_idx, repeat_idx))
                     for i in 1:length
                         token2pred.push_back(pred_idx)
                     end
@@ -82,3 +82,8 @@ function match(rules::Rules, tokens::Tokens)::Matches
     matches
 
 end
+
+
+const PREDICATES = Dict(
+    "isin"  => isin,
+)

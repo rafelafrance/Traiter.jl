@@ -3,13 +3,14 @@ const Phrases = Vector{Phrase}
 
 mutable struct Predicate
     field::INT
-    aux1::INT     # Information for matched tokens
+    aux::INT     # Information for matched tokens
     rep_lo::INT
     rep_hi::INT
     greedy::Bool
     phrases::Phrases
     func::Function
     Predicate() = new(0, 0, 0, 0, true, [])
+    Predicate(f, a, l, h, g, p, func) = new(f, a, l, h, g, p, func)
 end
 
 
@@ -21,10 +22,20 @@ struct Result
 end
 
 
-==(a::Predicate, b::Predicate) =
-    (a.field, a.aux1, a.rep_lo, a.rep_hi, a.greedy, a.phrases) ==
-    (b.field, b.aux1, b.rep_lo, b.rep_hi, b.greedy, b.phrases)
-
-const Predicates = Vector{Predicate}
 const Rule = Vector{Predicate}
 const Rules = Vector{Rule}
+
+
+==(a::Predicate, b::Predicate) =
+    (a.field, a.aux, a.rep_lo, a.rep_hi, a.greedy, a.phrases) ==
+    (b.field, b.aux, b.rep_lo, b.rep_hi, b.greedy, b.phrases)
+
+
+to_phrase(vocab::Vocabulary, str::AbstractString)::Phrase =
+    [add(vocab, s) for s in split(str)]
+
+to_phrases(vocab::Vocabulary, str::AbstractString)::Phrases =
+    [to_phrase(vocab, str)]
+
+to_phrases(vocab::Vocabulary, strs::Vector{Any})::Phrases =
+    [to_phrase(vocab, s) for s in strs]

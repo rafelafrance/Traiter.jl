@@ -15,14 +15,16 @@ mutable struct Scanner
     Scanner(v) = new(v, [], false)
 end
 
-const TEXT  = 1
-const CANON = 2
-const GENUS = 3
-const FIRST = 4
-const LAST  = 5
-const LEMMA = 6
-const POS   = 7
-const COLS = 7
+const FIELD = Dict(
+    "text"  => 1,
+    "canon" => 2,
+    "genus" => 3,
+    "first" => 4,
+    "last"  => 5,
+    "lemma" => 6,
+    "pos"   => 7,
+)
+const FIELDS = 7
 
 
 groupnames(match::RegexMatch)::Dict{Integer,String} =
@@ -56,7 +58,7 @@ end
 
 
 function scan(scanner::Scanner, str::AbstractString)
-    tokens = Matrix{INT}(undef, 0, COLS)
+    tokens = Matrix{INT}(undef, 0, FIELDS)
     !scanner.compiled && compile(scanner)
     for match in eachmatch(scanner.regex, str)
         group = get(groupnames(match), "1", "")
