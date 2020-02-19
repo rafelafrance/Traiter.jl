@@ -1,11 +1,12 @@
 module Traiter
 
-# const Int = UInt32
+const INT = UInt32
 
 
-export Trait, Traits, Int,
-       Vocabulary, Token, Tokens, tokenize, add, token,
-       TokenGenus, WORD, NUM, PUNCT,
+export Trait, Traits,
+       Vocabulary, add, token,
+       Scanner, scan, Tokens,
+       TEXT, CANON, GENUS, FIRST, LAST, LEMMA, POS, COLS,
        Rules, Rule, Predicate,
        match
 
@@ -17,7 +18,7 @@ abstract type Trait end
 const Traits = Array{Trait}
 
 
-for i in ["token", "rule", "matcher"]
+for i in ["vocabulary", "scanner", "ruler", "matcher"]
   include("traiter/$(i).jl")
 end
 

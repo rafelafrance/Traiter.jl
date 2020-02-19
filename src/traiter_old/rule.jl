@@ -17,8 +17,7 @@ const token_separator_re = Regex(token_separator)
 Rule(name::String, regex::Regex) = Rule(name, regex, nothing)
 
 build(str::AbstractString) = join(split(str), " ")
-build(strs::Union{Array{String},Array{SubString{String}}}) =
-    build(join(strs, " | "))
+build(strs::Union{Array{String},Array{SubString{String}}}) = build(join(strs, " | "))
 build(regex::Regex) = build(regex.pattern)
 
 function ==(a::Rule, b::Rule)

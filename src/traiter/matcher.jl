@@ -1,16 +1,16 @@
 struct Backtrack
-    token_idx::Int
-    pred_idx::Int
-    phrase_idx::Int
-    repeat_idx::Int
+    token_idx::INT
+    pred_idx::INT
+    phrase_idx::INT
+    repeat_idx::INT
 end
 
 
 struct Match
     rule::Rule
-    first_token::Int
-    last_token::Int
-    predicates::Predicates
+    first_token::INT
+    last_token::INT
+    token2pred::Predicates
     # Match() = new(Nothing, 0, 0, [])
 end
 
@@ -28,9 +28,10 @@ function match(rules::Rules, tokens::Tokens)::Matches
         for rule_idx = 1:length(rules)
             rule = self.rules[rule_idx]
 
-            pred_token, pred_idx, pred_state = token_idx, 0, 0
-            match = Match
-            token2pred = []
+            mathched = true
+            pred_token = token_idx      # Start with the current token
+            token2pred = []             # Link predicates to matching tokens
+            phrase_idx, repeat_idx = 0, 0
 
             while pred_idx <= length(rule.predicates)
                 pred = rule.predicates[pred_idx]
@@ -41,11 +42,9 @@ function match(rules::Rules, tokens::Tokens)::Matches
                 if result.success == true
                     self.stack.push(Backtrack(
                         token_idx, rule_idx, phrase_idx, repeat_idx))
-
                     for i in 1:length
-                        # token2pred.push_back(pred_idx)
+                        token2pred.push_back(pred_idx)
                     end
-
                     rule_idx += 1
                     pred_token += length
 
@@ -62,19 +61,21 @@ function match(rules::Rules, tokens::Tokens)::Matches
 
                 # All matches & backtracks failed so try next pattern
                 else
+                    matched = false
                     break
-
-        #     else:
-        #         # All rules in pattern passed so it's a match
-        #         matches.append(
-        #             Match(rule_idx, token_idx, pred_token, token2pred))
-        #         token_idx = pred_token - 1  # Handle += 1 below
-        #         self.stack.clear()
-        #         break  # Skip other patterns
-        #
                 end
             end
+
+            # All predicates in pattern passed so it's a match
+            if matched
+                # matches.append(
+                #     Match(rule_idx, token_idx, pred_token, token2pred))
+                # token_idx = pred_token - 1  # Handle += 1 below
+                # self.stack.clear()
+                # break  # Skip other patterns
+            end
         end
+
         token_idx += 1
     end
 

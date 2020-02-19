@@ -1,11 +1,11 @@
-const Phrase = Vector{Int}
+const Phrase = Vector{INT}
 const Phrases = Vector{Phrase}
 
 mutable struct Predicate
-    field::Int
-    aux1::Int     # Information for matched tokens
-    rep_lo::Int
-    rep_hi::Int
+    field::INT
+    aux1::INT     # Information for matched tokens
+    rep_lo::INT
+    rep_hi::INT
     greedy::Bool
     phrases::Phrases
     func::Function
@@ -14,9 +14,9 @@ end
 
 
 struct Result
-    phrase_idx::Int
-    repeat_idx::Int
-    length::Int
+    phrase_idx::INT
+    repeat_idx::INT
+    length::INT
     success::Bool
 end
 
