@@ -16,15 +16,15 @@ mutable struct Scanner
 end
 
 const FIELD = Dict(
-    "text"  => 1,
+    "text" => 1,
     "canon" => 2,
     "genus" => 3,
     "first" => 4,
-    "last"  => 5,
+    "last" => 5,
     "lemma" => 6,
-    "pos"   => 7,
+    "pos" => 7,
 )
-const FIELDS = 7
+const FIELDS = length(FIELD)
 
 
 groupnames(match::RegexMatch)::Dict{Integer,String} =

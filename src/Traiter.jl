@@ -9,7 +9,8 @@ export Trait, Traits,
        Scanner, scan, Tokens, FIELD, FIELDS,
        Rules, Rule, Predicate,
        match,
-       jsonl
+       jsonl, json
+
 
 import Base.==
 import DataStructures.Stack

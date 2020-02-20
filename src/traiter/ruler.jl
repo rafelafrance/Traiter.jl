@@ -10,7 +10,7 @@ mutable struct Predicate
     phrases::Phrases
     func::Function
     Predicate() = new(0, 0, 0, 0, true, [])
-    Predicate(f, a, l, h, g, p, func) = new(f, a, l, h, g, p, func)
+    Predicate(f, a, l, h, g, p, fn) = new(f, a, l, h, g, p, fn)
 end
 
 

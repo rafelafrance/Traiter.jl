@@ -1,0 +1,15 @@
+[
+  [{
+    "canon": "test one",
+    "rep": [2, 3],
+    "aux": "aux one"
+  }, {
+    "canon": ["test", "two three"],
+    "rep": "*",
+    "aux": "aux two"
+  }, {
+    "canon": "four",
+    "rep": "?",
+    "aux": "aux three"
+  }]
+]

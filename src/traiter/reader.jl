@@ -2,10 +2,24 @@ function jsonl(filename, vocab::Vocabulary)
     rules::Rules = []
     for line in eachline(filename)
         rule::Rule = []
-        raw = JSON.parse(line)
+        raw = JSON.parse(line, inttype=INT)
         for predicate in raw
             append!(rule, parse_predicate(vocab, predicate))
         end
+        append!(rules, [rule])
+    end
+end
+
+
+function json(filename, vocab::Vocabulary)
+    rules::Rules = []
+    json = JSON.parsefile(filename, inttype=INT)
+    for raw in json
+        rule::Rule = []
+        for predicate in raw
+            append!(rule, parse_predicate(vocab, predicate))
+        end
+        append!(rules, [rule])
     end
 end
 
@@ -37,12 +51,12 @@ function parse_predicate(vocab::Vocabulary, predicate::Dict)::Vector{Predicate}
             elseif value == "+"
                 rep_lo, rep_hi = 1, MAXINT
             else
-                # This is an error
+                # TODO This is an error
             end
         else
-            # This is an error
+            # TODO This is an error
         end
     end
-    # Need to check fields before building
+    # TODO Validate before returning
     [Predicate(field, aux, rep_lo, rep_hi, greedy, phrases, func)]
 end
