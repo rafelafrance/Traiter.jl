@@ -14,7 +14,7 @@ struct Match
     # Match() = new(Nothing, 0, 0, [])
 end
 
-function isin(
+function in_phrases(
     tokens::Tokens,
     pred::Predicate,
     token_idx::INT,
@@ -40,8 +40,8 @@ function match(rules::Rules, tokens::Tokens)::Vector{Match}
             token2pred = []             # Link predicates to matching tokens
             phrase_idx, repeat_idx = 0, 0
 
-            while pred_idx <= length(rule.predicates)
-                pred = rule.predicates[pred_idx]
+            while pred_idx <= length(rule)
+                pred = rule[pred_idx]
 
                 success = pred.func(
                     tokens,
@@ -101,4 +101,4 @@ function match(rules::Rules, tokens::Tokens)::Vector{Match}
 end
 
 
-const PREDICATES = Dict("isin" => isin,)
+const PREDICATES = Dict("in_phrases" => in_phrases,)

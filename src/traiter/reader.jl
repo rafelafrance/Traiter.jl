@@ -31,7 +31,7 @@ function parse_predicate(vocab::Vocabulary, predicate::Dict)::Vector{Predicate}
     greedy::Bool = true
     phrases = []
     aux = ""
-    func = PREDICATES["isin"]
+    func = PREDICATES["in_phrases"]
 
     for (key, value) in predicate
         key = lowercase(key)
